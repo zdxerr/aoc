@@ -6,14 +6,15 @@ const RED: u32 = 12;
 const GREEN: u32 = 13;
 const BLUE: u32 = 14;
 
-pub fn part1() -> Result<(), Error> {
-    let t0 = Instant::now();
-    let input_path = env::args().nth(1).expect("no input path");
-    let buff_reader = BufReader::new(fs::File::open(input_path)?);
+pub fn part1(input_reader: BufReader<fs::File>) -> Option<usize> {
+    // pub fn part1() -> Result<(), Error> {
+    // let t0 = Instant::now();
+    // let input_path = env::args().nth(1).expect("no input path");
+    // let buff_reader = BufReader::new(fs::File::open(input_path)?);
 
-    let mut solution: u32 = 0;
+    let mut solution: usize = 0;
 
-    'outer: for line in buff_reader.lines() {
+    'outer: for line in input_reader.lines() {
         let line = line.expect("unable to read line");
         let (game, rest) = line.split_once(':').unwrap();
         let (_, game) = game.split_once(' ').unwrap();
@@ -31,8 +32,8 @@ pub fn part1() -> Result<(), Error> {
                 }
             }
         }
-        solution += game.parse::<u32>().unwrap();
+        solution += game.parse::<usize>().unwrap();
     }
-    println!("Solution: {} / Duration: {:.6?}", solution, t0.elapsed());
-    Ok(())
+    // println!("Solution: {} / Duration: {:.6?}", solution, t0.elapsed());
+    Some(solution)
 }
