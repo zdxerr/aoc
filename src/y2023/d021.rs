@@ -1,17 +1,11 @@
-use std::io::{BufRead, BufReader, Error};
-use std::time::Instant;
-use std::{env, fs};
+use std::fs;
+use std::io::{BufRead, BufReader};
 
 const RED: u32 = 12;
 const GREEN: u32 = 13;
 const BLUE: u32 = 14;
 
 pub fn part1(input_reader: BufReader<fs::File>) -> Option<usize> {
-    // pub fn part1() -> Result<(), Error> {
-    // let t0 = Instant::now();
-    // let input_path = env::args().nth(1).expect("no input path");
-    // let buff_reader = BufReader::new(fs::File::open(input_path)?);
-
     let mut solution: usize = 0;
 
     'outer: for line in input_reader.lines() {
@@ -22,7 +16,6 @@ pub fn part1(input_reader: BufReader<fs::File>) -> Option<usize> {
         for draw in rest.split(';') {
             for number_and_color in draw.split(",") {
                 let (number, color) = number_and_color.trim().split_once(' ').unwrap();
-                // dbg!(number);
                 let number: u32 = number.parse().unwrap();
                 match color {
                     "red" if number > RED => continue 'outer,
@@ -34,6 +27,5 @@ pub fn part1(input_reader: BufReader<fs::File>) -> Option<usize> {
         }
         solution += game.parse::<usize>().unwrap();
     }
-    // println!("Solution: {} / Duration: {:.6?}", solution, t0.elapsed());
     Some(solution)
 }
