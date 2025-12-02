@@ -1,6 +1,7 @@
 mod y2023;
+mod y2025;
 
-use std::io::BufReader;
+use std::io::{BufRead, BufReader};
 use std::time::Instant;
 use std::{env, fs};
 // use y2023::d021::part1;
@@ -59,9 +60,6 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (u8, u8, u8) {
         ((b + m) * 255.0) as u8,
     )
 }
-fn get_binary_path() -> Option<PathBuf> {
-    env::current_exe().ok()
-}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // println!("Hello, world!");
@@ -100,34 +98,107 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(res) = res {
         print!(" {res} ❌✔ \u{274C} \u{2714}");
     } else {
-        print!(" ∅");
+        println!(" ∅");
     }
 
-    // 1. 256-color ramp
-    println!("256-color ramp (16–231):");
-    for i in 16..232 {
-        print!("\x1b[38;5;{}m▓\x1b[0m", i);
-        if (i - 16) % 36 == 35 {
-            println!();
+    // rgb_print!()
+    println!("2025.01.1 Secret Entrance ");
+
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d01")
+        .join("input.txt");
+    // .join("test.txt");
+
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(input_path)?);
+    let mut s: i16 = 50;
+    let mut count: usize = 0;
+    for line in buff_reader.lines() {
+        let line = line.expect("unable to read line");
+        let c = line.chars().nth(0).expect("unable to read first char");
+        let n = &line[1..].parse::<i16>().expect("unable to parse number");
+        println!("{s:#?} {c:#?} {n:#?}");
+        s = match c {
+            'R' => (s + n).rem_euclid(100),
+            'L' => (s - n).rem_euclid(100),
+            _ => panic!("unexpected first char"),
+        };
+        // dbg!(line.churs().nth(0).expect("unable to read first char"));
+        //
+        if s == 0 {
+            count += 1;
         }
     }
-    println!();
+    let duration = t0.elapsed().as_nanos();
+    println!("X ⏱ {duration:12}ns {count}");
 
-    // 2. Grayscale (232–255)
-    println!("Grayscale:");
-    for i in 232..256 {
-        print!("\x1b[38;5;{}m▒▒\x1b[0m", i);
-    }
-    println!("\x1b[0m");
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d01")
+        .join("input.txt");
+    // .join("test2.txt");
 
-    // 3. True color gradient
-    println!("True color rainbow gradient:");
-    let text = "Rust ❤ True Color!";
-    for (i, c) in text.chars().enumerate() {
-        let hue = i as f64 * 360.0 / text.len() as f64;
-        let (r, g, b) = hsv_to_rgb(hue, 1.0, 1.0);
-        print!("\x1b[38;2;{};{};{}m{}\x1b[0m", r, g, b, c);
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(input_path)?);
+    let mut s: i16 = 50;
+    let mut count: usize = 0;
+    for line in buff_reader.lines() {
+        let line = line.expect("unable to read line");
+        let c = line.chars().nth(0).expect("unable to read first char");
+        let n = &line[1..].parse::<i16>().expect("unable to parse number");
+        let w = match c {
+            'R' => s + n,
+            'L' => s - n,
+            _ => panic!("unexpected first char"),
+        };
+
+        let a = w.div_euclid(100);
+        let b = w.rem_euclid(100);
+        print!("{s:#?} {c:#?} {n:#?} {w:#?} {a} {b}");
+        if c == 'L' && b == 0 {
+            count += 1;
+        }
+        // if a < 0 {
+        count += a.abs() as usize; // - 1;
+        // } else {
+        // count += a.abs() as usize;
+        // }
+        if c == 'L' && s == 0 {
+            count -= 1;
+        }
+        println!("  -- {count:?}");
+        s = w.rem_euclid(100);
     }
-    println!();
+    let duration = t0.elapsed().as_nanos();
+    println!("X ⏱ {duration:12}ns {count}");
+    // 1. 256-color ramp
+    // println!("256-color ramp (16–231):");
+    // for i in 16..232 {
+    //     print!("\x1b[38;5;{}m▓\x1b[0m", i);
+    //     if (i - 16) % 36 == 35 {
+    //         println!();
+    //     }
+    // }
+    // println!();
+
+    // // 2. Grayscale (232–255)
+    // println!("Grayscale:");
+    // for i in 232..256 {
+    //     print!("\x1b[38;5;{}m▒▒\x1b[0m", i);
+    // }
+    // println!("\x1b[0m");
+
+    // // 3. True color gradient
+    // println!("True color rainbow gradient:");
+    // let text = "Rust ❤ True Color!";
+    // for (i, c) in text.chars().enumerate() {
+    //     let hue = i as f64 * 360.0 / text.len() as f64;
+    //     let (r, g, b) = hsv_to_rgb(hue, 1.0, 1.0);
+    //     print!("\x1b[38;2;{};{};{}m{}\x1b[0m", r, g, b, c);
+    // }
+    // println!();
     Ok(())
 }
