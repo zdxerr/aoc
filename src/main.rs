@@ -79,9 +79,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(2023, 2, 1);
     let year = 2023;
     let day = 2;
-    let part = 1;
     let title = "Cube Conundrum";
-    print!("{year}.{day:02}.{part} {title:20}");
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
 
     let input_path = env::current_dir()?
         .join("input")
@@ -96,14 +97,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let duration = t0.elapsed().as_nanos();
     print!(" ⏱ {duration:12}ns");
     if let Some(res) = res {
-        print!(" {res} ❌✔ \u{274C} \u{2714}");
+        println!(" {res} ❌✔ \u{274C} \u{2714}");
     } else {
         println!(" ∅");
     }
-
-    // rgb_print!()
-    println!("2025.01.1 Secret Entrance ");
-
+    let year = 2025;
+    let day = 1;
+    let title = "Secret Entrance";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
     let input_path = env::current_dir()?
         .join("input")
         .join("y2025")
@@ -119,20 +122,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let line = line.expect("unable to read line");
         let c = line.chars().nth(0).expect("unable to read first char");
         let n = &line[1..].parse::<i16>().expect("unable to parse number");
-        println!("{s:#?} {c:#?} {n:#?}");
+        // println!("{s:#?} {c:#?} {n:#?}");
         s = match c {
             'R' => (s + n).rem_euclid(100),
             'L' => (s - n).rem_euclid(100),
             _ => panic!("unexpected first char"),
         };
-        // dbg!(line.churs().nth(0).expect("unable to read first char"));
-        //
         if s == 0 {
             count += 1;
         }
     }
-    let duration = t0.elapsed().as_nanos();
-    println!("X ⏱ {duration:12}ns {count}");
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{count}");
+    println!();
 
     let input_path = env::current_dir()?
         .join("input")
@@ -142,7 +145,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // .join("test2.txt");
 
     let t0 = Instant::now();
-    let buff_reader = BufReader::new(fs::File::open(input_path)?);
+    let buff_reader = BufReader::new(fs::File::open(&input_path)?);
     let mut s: i16 = 50;
     let mut count: usize = 0;
     for line in buff_reader.lines() {
@@ -157,24 +160,112 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let a = w.div_euclid(100);
         let b = w.rem_euclid(100);
-        print!("{s:#?} {c:#?} {n:#?} {w:#?} {a} {b}");
+        // print!("{s:#?} {c:#?} {n:#?} {w:#?} {a} {b}");
         if c == 'L' && b == 0 {
             count += 1;
         }
-        // if a < 0 {
         count += a.abs() as usize; // - 1;
-        // } else {
-        // count += a.abs() as usize;
-        // }
         if c == 'L' && s == 0 {
             count -= 1;
         }
-        println!("  -- {count:?}");
+        // println!("  -- {count:?}");
         s = w.rem_euclid(100);
     }
-    let duration = t0.elapsed().as_nanos();
-    println!("X ⏱ {duration:12}ns {count}");
-    // 1. 256-color ramp
+
+    let duration = t0.elapsed().as_micros();
+
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{count}");
+    println!();
+
+    let year = 2025;
+    let day = 2;
+    let title = "Gift Shop";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d02")
+        .join("input.txt");
+    // .join("test.txt");
+
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(&input_path)?);
+    let mut sum: usize = 0;
+    for pair in buff_reader.split(b',') {
+        let pair = pair?;
+        let splitted: Vec<&[u8]> = pair.splitn(2, |v| *v == b'-').collect();
+        let a: usize = std::str::from_utf8(splitted[0])?.trim().parse()?;
+        let b: usize = std::str::from_utf8(splitted[1])?.trim().parse()?;
+
+        let r = a..=b;
+        for id in r {
+            let s = id.to_string();
+            let p = s.len().midpoint(0);
+            let s1 = &s[0..p];
+            let s2 = &s[p..];
+            let m = s1 == s2;
+            if s1 == s2 {
+                sum += id;
+            }
+        }
+    }
+    let duration = t0.elapsed().as_micros();
+
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
+
+    fn invalid(id: &usize) -> bool {
+        let id = id.to_string();
+        let len = id.len();
+
+        for chunk_length in 1..=(len / 2) {
+            if len % chunk_length != 0 {
+                continue;
+            }
+
+            let mut invalid = true;
+
+            for chunk_number in 1..(len / chunk_length) {
+                let a = &id[0..chunk_length];
+                if id[0..chunk_length]
+                    != id[(chunk_number * chunk_length)..((chunk_number + 1) * chunk_length)]
+                {
+                    invalid = false;
+                    break;
+                }
+            }
+            if invalid {
+                return true;
+            }
+        }
+        false
+    }
+
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(&input_path)?);
+    let mut sum: usize = 0;
+    for pair in buff_reader.split(b',') {
+        let pair = pair?;
+        let splitted: Vec<&[u8]> = pair.splitn(2, |v| *v == b'-').collect();
+        let a: usize = std::str::from_utf8(splitted[0])?.trim().parse()?;
+        let b: usize = std::str::from_utf8(splitted[1])?.trim().parse()?;
+
+        for id in a..=b {
+            if invalid(&id) {
+                sum += id;
+            }
+        }
+    }
+    let duration = t0.elapsed().as_micros();
+
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
     // println!("256-color ramp (16–231):");
     // for i in 16..232 {
     //     print!("\x1b[38;5;{}m▓\x1b[0m", i);
