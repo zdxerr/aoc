@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("y2023")
         .join("d02")
         .join("input.txt");
-    // println!("  Path: {}", input_path.display());
+    println!("  Path: {}", input_path.display());
     let t0 = Instant::now();
     let buff_reader = BufReader::new(fs::File::open(input_path)?);
 
@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let duration = t0.elapsed().as_nanos();
     print!(" ⏱ {duration:12}ns");
     if let Some(res) = res {
-        print!(" {res} ❌✔");
+        print!(" {res} ❌✔ \u{274C} \u{2714}");
     } else {
         print!(" ∅");
     }
