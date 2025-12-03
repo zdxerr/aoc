@@ -62,21 +62,6 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (u8, u8, u8) {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // println!("Hello, world!");
-    // if let Some(path) = get_binary_path() {
-    //     println!("Running from: {}", path.display());
-    // } else {
-    //     println!("Could not determine binary path.");
-    // }
-
-    // let cwd: PathBuf = env::current_dir()?;
-
-    // println!("Current Working Directory:");
-    // println!("  Path: {}", cwd.display());
-    //
-    //
-    //
-    // run!(2023, 2, 1);
     let year = 2023;
     let day = 2;
     let title = "Cube Conundrum";
@@ -261,6 +246,75 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+    let duration = t0.elapsed().as_micros();
+
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
+
+    let year = 2025;
+    let day = 3;
+    let title = "Lobby";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d03")
+        .join("input.txt");
+    // .join("test.txt");
+
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(&input_path)?);
+    let mut sum: usize = 0;
+    for bank in buff_reader.split(b'\n') {
+        let bank = bank.unwrap();
+        let max = bank[..bank.len() - 1]
+            .iter()
+            .enumerate()
+            .fold(
+                (0, 0_u8),
+                |max, (ind, &val)| if val > max.1 { (ind, val) } else { max },
+            );
+        let max2 = bank[max.0 + 1..].iter().max().unwrap();
+        sum += str::from_utf8(&[max.1, *max2])?.parse::<usize>().unwrap();
+    }
+
+    let duration = t0.elapsed().as_micros();
+
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
+    let t0 = Instant::now();
+    let buff_reader = BufReader::new(fs::File::open(&input_path)?);
+    let mut sum: usize = 0;
+    let mut v: Vec<u8> = Vec::new();
+    for bank in buff_reader.split(b'\n') {
+        let bank = bank.unwrap();
+        let mut i = 0;
+        v.clear();
+        // println!(" {}", str::from_utf8(&bank).unwrap());
+        for n in (0..12).rev() {
+            let max =
+                bank[i..bank.len() - n]
+                    .iter()
+                    .enumerate()
+                    .fold(
+                        (0, 0_u8),
+                        |max, (ind, &val)| if val > max.1 { (ind, val) } else { max },
+                    );
+
+            v.push(max.1);
+            // println!("   {n:3} {max:?}");
+            i += max.0 + 1;
+            // let max2 = bank[max.0 + 1..].iter().max().unwrap();
+        }
+        // println!(" {}", str::from_utf8(&v).unwrap());
+        sum += str::from_utf8(&v)?.parse::<usize>().unwrap();
+    }
+
     let duration = t0.elapsed().as_micros();
 
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
