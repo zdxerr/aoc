@@ -316,10 +316,107 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let duration = t0.elapsed().as_micros();
-
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
     rgb_print!(196, 167, 231, "{sum}");
     println!();
+
+    let year = 2025;
+    let day = 3;
+    let title = "Printing Department";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d04")
+        .join("input.txt");
+    // .join("test.txt");
+
+    let t0 = Instant::now();
+    let mut sum: usize = 0;
+    let grid = fs::read(&input_path)?;
+    const NL: u8 = b'\n';
+    const ROLL: u8 = b'@';
+    let row_len = grid.iter().position(|c| c == &NL).unwrap();
+
+    for index in 0..grid.len() {
+        if grid[index] != ROLL {
+            continue;
+        }
+        let adjacent_indices = [
+            index.checked_sub(row_len + 2),
+            index.checked_sub(row_len + 1),
+            index.checked_sub(row_len),
+            index.checked_sub(1),
+            index.checked_add(1),
+            index.checked_add(row_len),
+            index.checked_add(row_len + 1),
+            index.checked_add(row_len + 2),
+        ];
+        let adjacent_rolls = adjacent_indices
+            .iter()
+            .flatten()
+            .filter(|index| **index < grid.len())
+            .filter(|index| grid[**index] == ROLL)
+            .count();
+
+        if adjacent_rolls < 4 {
+            sum += 1;
+        }
+    }
+
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
+
+    let t0 = Instant::now();
+    let mut sum: usize = 0;
+    let mut grid = fs::read(&input_path)?;
+    let row_len = grid.iter().position(|c| c == &NL).unwrap();
+
+    loop {
+        let last_sum = sum;
+        for index in 0..grid.len() {
+            if grid[index] != ROLL {
+                continue;
+            }
+            let adjacent_indices = [
+                index.checked_sub(row_len + 2),
+                index.checked_sub(row_len + 1),
+                index.checked_sub(row_len),
+                index.checked_sub(1),
+                index.checked_add(1),
+                index.checked_add(row_len),
+                index.checked_add(row_len + 1),
+                index.checked_add(row_len + 2),
+            ];
+            let adjacent_rolls = adjacent_indices
+                .iter()
+                .flatten()
+                .filter(|index| **index < grid.len())
+                .filter(|index| grid[**index] == ROLL)
+                .count();
+
+            if adjacent_rolls < 4 {
+                grid[index] = b'.';
+                sum += 1;
+            }
+        }
+        if last_sum == sum {
+            break;
+        }
+    }
+
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{sum}");
+    println!();
+    // for row in buff_reader.split(b'\n') {
+    //     println!("{row:?}")
+    // }
     // println!("256-color ramp (16–231):");
     // for i in 16..232 {
     //     print!("\x1b[38;5;{}m▓\x1b[0m", i);
