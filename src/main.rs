@@ -176,7 +176,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("d02")
         .join("input.txt");
     // .join("test.txt");
-
     let t0 = Instant::now();
     let buff_reader = BufReader::new(fs::File::open(&input_path)?);
     let mut sum: usize = 0;
@@ -186,14 +185,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let a: usize = std::str::from_utf8(splitted[0])?.trim().parse()?;
         let b: usize = std::str::from_utf8(splitted[1])?.trim().parse()?;
 
-        let r = a..=b;
-        for id in r {
-            let s = id.to_string();
-            let p = s.len().midpoint(0);
-            let s1 = &s[0..p];
-            let s2 = &s[p..];
-            let m = s1 == s2;
-            if s1 == s2 {
+        for id in a..=b {
+            let len = id.checked_ilog10().unwrap() + 1;
+            let p = len.checked_div(2).unwrap();
+            // if p == 0 {
+            //     continue;
+            // }
+            let a = id.div_euclid(10_usize.pow(p));
+            let b = id.rem_euclid(10_usize.pow(p));
+            if a == b {
                 sum += id;
             }
         }
@@ -207,6 +207,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fn invalid(id: &usize) -> bool {
         let id = id.to_string();
         let len = id.len();
+
+        5_usize.next_multiple_of(2);
 
         for chunk_length in 1..=(len / 2) {
             if len % chunk_length != 0 {
@@ -321,7 +323,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!();
 
     let year = 2025;
-    let day = 3;
+    let day = 4;
     let title = "Printing Department";
     rgb_print!(156, 207, 216, "{year}.{day:02} ");
     rgb_print!(224, 222, 244, "{title:20}");
@@ -335,80 +337,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // .join("test.txt");
 
     let t0 = Instant::now();
-    let mut sum: usize = 0;
-    let grid = fs::read(&input_path)?;
-    const NL: u8 = b'\n';
-    const ROLL: u8 = b'@';
-    let row_len = grid.iter().position(|c| c == &NL).unwrap();
-
-    for index in 0..grid.len() {
-        if grid[index] != ROLL {
-            continue;
-        }
-        let adjacent_indices = [
-            index.checked_sub(row_len + 2),
-            index.checked_sub(row_len + 1),
-            index.checked_sub(row_len),
-            index.checked_sub(1),
-            index.checked_add(1),
-            index.checked_add(row_len),
-            index.checked_add(row_len + 1),
-            index.checked_add(row_len + 2),
-        ];
-        let adjacent_rolls = adjacent_indices
-            .iter()
-            .flatten()
-            .filter(|index| **index < grid.len())
-            .filter(|index| grid[**index] == ROLL)
-            .count();
-
-        if adjacent_rolls < 4 {
-            sum += 1;
-        }
-    }
+    let result = y2025::d04::part1(&input_path);
 
     let duration = t0.elapsed().as_micros();
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
-    rgb_print!(196, 167, 231, "{sum}");
+    rgb_print!(196, 167, 231, "{result}");
     println!();
 
     let t0 = Instant::now();
-    let mut sum: usize = 0;
-    let mut grid = fs::read(&input_path)?;
-    let row_len = grid.iter().position(|c| c == &NL).unwrap();
-
-    loop {
-        let last_sum = sum;
-        for index in 0..grid.len() {
-            if grid[index] != ROLL {
-                continue;
-            }
-            let adjacent_indices = [
-                index.checked_sub(row_len + 2),
-                index.checked_sub(row_len + 1),
-                index.checked_sub(row_len),
-                index.checked_sub(1),
-                index.checked_add(1),
-                index.checked_add(row_len),
-                index.checked_add(row_len + 1),
-                index.checked_add(row_len + 2),
-            ];
-            let adjacent_rolls = adjacent_indices
-                .iter()
-                .flatten()
-                .filter(|index| **index < grid.len())
-                .filter(|index| grid[**index] == ROLL)
-                .count();
-
-            if adjacent_rolls < 4 {
-                grid[index] = b'.';
-                sum += 1;
-            }
-        }
-        if last_sum == sum {
-            break;
-        }
-    }
+    let sum = y2025::d04::part2(&input_path);
 
     let duration = t0.elapsed().as_micros();
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
@@ -442,5 +379,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     print!("\x1b[38;2;{};{};{}m{}\x1b[0m", r, g, b, c);
     // }
     // println!();
+    //
+    //
+    let year = 2025;
+    let day = 5;
+    let title = "Cafeteria";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d05")
+        .join("input.txt");
+    // .join("test.txt");
+
+    let t0 = Instant::now();
+    let result = y2025::d05::part1(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
+    let t0 = Instant::now();
+    let result = y2025::d05::part2(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
     Ok(())
 }
