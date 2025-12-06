@@ -4,9 +4,6 @@ mod y2025;
 use std::io::{BufRead, BufReader};
 use std::time::Instant;
 use std::{env, fs};
-// use y2023::d021::part1;
-
-use std::path::PathBuf;
 
 // #[cfg(windows)]
 // {
@@ -19,46 +16,20 @@ use std::path::PathBuf;
 //     }
 // }
 
-macro_rules! rgb {
-    ($r:expr, $g:expr, $b:expr $(, bg)?) => {{
-        const ESC: &str = "\x1b[";
-        const RESET: &str = "\x1b[0m";
-        $(
-            format!("{}48;2;{};{};{}m", ESC, $r, $g, $b)
-        )?
-        format!("{}38;2;{};{};{}m", ESC, $r, $g, $b)
-    }};
-}
+// macro_rules! rgb {
+//     ($r:expr, $g:expr, $b:expr $(, bg)?) => {{
+//         const ESC: &str = "\x1b[";
+//         const RESET: &str = "\x1b[0m";
+//         $(
+//             format!("{}48;2;{};{};{}m", ESC, $r, $g, $b)
+//         )?
+//         format!("{}38;2;{};{};{}m", ESC, $r, $g, $b)
+//     }};
+// }
 macro_rules! rgb_print {
     ($r:expr, $g:expr, $b:expr, $($arg:tt)*) => {
         print!("\x1b[38;2;{};{};{}m{}\x1b[0m", $r, $g, $b, format!($($arg)*))
     };
-}
-// HSV → RGB conversion
-fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (u8, u8, u8) {
-    let c = v * s;
-    let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
-    let m = v - c;
-
-    let (r, g, b) = if h < 60.0 {
-        (c, x, 0.0)
-    } else if h < 120.0 {
-        (x, c, 0.0)
-    } else if h < 180.0 {
-        (0.0, c, x)
-    } else if h < 240.0 {
-        (0.0, x, c)
-    } else if h < 300.0 {
-        (x, 0.0, c)
-    } else {
-        (c, 0.0, x)
-    };
-
-    (
-        ((r + m) * 255.0) as u8,
-        ((g + m) * 255.0) as u8,
-        ((b + m) * 255.0) as u8,
-    )
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -208,8 +179,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let id = id.to_string();
         let len = id.len();
 
-        5_usize.next_multiple_of(2);
-
         for chunk_length in 1..=(len / 2) {
             if len % chunk_length != 0 {
                 continue;
@@ -218,7 +187,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut invalid = true;
 
             for chunk_number in 1..(len / chunk_length) {
-                let a = &id[0..chunk_length];
                 if id[0..chunk_length]
                     != id[(chunk_number * chunk_length)..((chunk_number + 1) * chunk_length)]
                 {
@@ -394,6 +362,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("d05")
         .join("input.txt");
     // .join("test.txt");
+    // .join("test2.txt");
 
     let t0 = Instant::now();
     let result = y2025::d05::part1(&input_path);
@@ -407,5 +376,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
     rgb_print!(196, 167, 231, "{result:?}");
     println!();
+
+    let year = 2025;
+    let day = 6;
+    let title = "Trash Compactor";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d06")
+        // .join("input.txt");
+        .join("test.txt");
+    // .join("test2.txt");
+
+    let t0 = Instant::now();
+    let result = y2025::d06::part1(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
+    let t0 = Instant::now();
+    let result = y2025::d06::part2(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
+
     Ok(())
 }
