@@ -54,28 +54,63 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
         .filter(|(_, column)| *column != ' ')
         .collect();
 
-    println!("{operators:?}");
+    // println!("{operators:?}");
 
-    let mut columns: Vec<Vec<Vec<char>>> = vec![vec![vec![]]; operators.len()];
+    // let mut columns: Vec<Vec<Vec<u64>>> = vec![vec![vec![]]; operators.len()];
+    let mut columns: Vec<Vec<u64>> = vec![vec![]; operators.len()];
 
-    lines.enumerate().for_each(|(line_idx, line)| {
-        println!("{line}");
-        for (column_idx, op) in operators.windows(2).enumerate() {
-            for char_idx in op[0].0..op[1].0 {
-                let c = line.chars().nth(char_idx).unwrap();
-
-                if let Some(cs) = columns[column_idx].get_mut(char_idx - op[0].0) {
-                    cs.push(c);
-                } else {
-                    columns[column_idx].insert(char_idx - op[0].0, vec![c]);
+    lines.rev().for_each(|line| {
+        for column_idx in 0..operators.len() {
+            let op = operators[column_idx];
+            let x = if let Some(next_op) = operators.get(column_idx + 1) {
+                next_op.0 - 1
+            } else {
+                line.len()
+            };
+            for char_idx in op.0..x {
+                let rchar_idx = char_idx - op.0;
+                let x = columns[column_idx].get(rchar_idx);
+                if x == None {
+                    // columns[column_idx].insert(rchar_idx, vec![]);
+                    columns[column_idx].insert(rchar_idx, 0);
                 }
-                println!("{char_idx} {c}");
+                let c = line.chars().nth(char_idx).unwrap();
+                if c == ' ' {
+                    continue;
+                }
+                // let lindex = columns[column_idx][rchar_idx].len();
+                // columns[column_idx][rchar_idx].insert(lindex, c.to_digit(10).unwrap() as u64);
+                columns[column_idx][rchar_idx] =
+                    columns[column_idx][rchar_idx] * 10 + c.to_digit(10).unwrap() as u64;
+                // columns[column_idx][rchar_idx].push(c.to_digit(10).unwrap() as u64);
+
+                // if let Some(cs) = columns[column_idx].get_mut(char_idx - op[0].0) {
+                //     cs.push(c);
+                // } else {
+                //     columns[column_idx].insert(char_idx - op[0].0, vec![c]);
+                // }
             }
         }
     });
 
-    println!("{columns:?}");
-
+    // println!("{columns:?}");
+    let sum = operators
+        .iter()
+        .zip(columns.into_iter())
+        .map(|(op, values)| {
+            values
+                .into_iter()
+                .reduce(|acc, value| match op.1 {
+                    '+' => acc + value,
+                    '*' => acc * value,
+                    _ => panic!(""),
+                })
+                .unwrap()
+        })
+        // .inspect(|x| {
+        //     println!("  {x}");
+        // })
+        .sum();
     // lcet sum: Vec<(usize, Vec<u64>)> = lines
     //     .map(|row| {
     //         row.trim()
@@ -115,5 +150,5 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     // .unwrap()
     // .iter()
     // .sum();
-    Ok(9)
+    Ok(sum)
 }

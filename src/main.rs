@@ -387,8 +387,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("input")
         .join("y2025")
         .join("d06")
-        // .join("input.txt");
-        .join("test.txt");
+        .join("input.txt");
+    // .join("test.txt");
     // .join("test2.txt");
 
     let t0 = Instant::now();
