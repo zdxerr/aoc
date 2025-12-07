@@ -54,9 +54,6 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
         .filter(|(_, column)| *column != ' ')
         .collect();
 
-    // println!("{operators:?}");
-
-    // let mut columns: Vec<Vec<Vec<u64>>> = vec![vec![vec![]]; operators.len()];
     let mut columns: Vec<Vec<u64>> = vec![vec![]; operators.len()];
 
     lines.rev().for_each(|line| {
@@ -78,22 +75,12 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                 if c == ' ' {
                     continue;
                 }
-                // let lindex = columns[column_idx][rchar_idx].len();
-                // columns[column_idx][rchar_idx].insert(lindex, c.to_digit(10).unwrap() as u64);
                 columns[column_idx][rchar_idx] =
                     columns[column_idx][rchar_idx] * 10 + c.to_digit(10).unwrap() as u64;
-                // columns[column_idx][rchar_idx].push(c.to_digit(10).unwrap() as u64);
-
-                // if let Some(cs) = columns[column_idx].get_mut(char_idx - op[0].0) {
-                //     cs.push(c);
-                // } else {
-                //     columns[column_idx].insert(char_idx - op[0].0, vec![c]);
-                // }
             }
         }
     });
 
-    // println!("{columns:?}");
     let sum = operators
         .iter()
         .zip(columns.into_iter())
@@ -107,48 +94,6 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                 })
                 .unwrap()
         })
-        // .inspect(|x| {
-        //     println!("  {x}");
-        // })
         .sum();
-    // lcet sum: Vec<(usize, Vec<u64>)> = lines
-    //     .map(|row| {
-    //         row.trim()
-    //             .split_whitespace()
-    //             .filter(|column| *column != " ")
-    //             .enumerate()
-    //             .map(|(index, column)| {
-    //                 column
-    //                     .chars()
-    //                     .map(|c| c.to_digit(10).unwrap())
-    //                     .reduce(|a, b| match operators[index] {
-    //                         "+" => a + b,
-    //                         "*" => a * b,
-    //                         _ => panic!("unexpected operator"),
-    //                     })
-    //                     .unwrap() as u64
-    //             })
-    //             .collect::<Vec<u64>>()
-    //     })
-    //     .enumerate()
-    //     .inspect(|(row_idx, columns)| {
-    //         println!("{row_idx}  {columns:?}");
-    //     })
-    //     .collect();
-    // .reduce(|(index_a, row_a), (index_b, row_b)| {
-    //     row_a
-    //         .iter()
-    //         .zip(row_b.iter())
-    //         .enumerate()
-    //         .map(|(index, (a, b))| match operators[index] {
-    //             "+" => a + b,
-    //             "*" => a * b,
-    //             _ => panic!("unexpected operator"),
-    //         })
-    //         .collect()
-    // })
-    // .unwrap()
-    // .iter()
-    // .sum();
     Ok(sum)
 }

@@ -404,5 +404,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     rgb_print!(196, 167, 231, "{result:?}");
     println!();
 
+    let year = 2025;
+    let day = 7;
+    let title = "Laboratories";
+    rgb_print!(156, 207, 216, "{year}.{day:02} ");
+    rgb_print!(224, 222, 244, "{title:20}");
+    println!();
+    let input_path = env::current_dir()?
+        .join("input")
+        .join("y2025")
+        .join("d07")
+        .join("input.txt");
+    // .join("test.txt");
+    // .join("test2.txt");
+
+    let t0 = Instant::now();
+    let result = y2025::d07::part1(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
+    let t0 = Instant::now();
+    let result = y2025::d07::part2(&input_path);
+    let duration = t0.elapsed().as_micros();
+    rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+    rgb_print!(196, 167, 231, "{result:?}");
+    println!();
     Ok(())
 }

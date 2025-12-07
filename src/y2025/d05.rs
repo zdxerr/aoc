@@ -59,9 +59,9 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                     return 1;
                 }
 
-                if id > *end {
-                    break;
-                }
+                // if id > *end {
+                //     break;
+                // }
                 // else if id >= *start {
                 //     return 1;
                 // }
