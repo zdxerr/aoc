@@ -470,7 +470,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("d09")
         // .join("input.txt");
         .join("test.txt");
-    // .join("test2.txt");
+    // .join("test2.txt"); // = 30
 
     let t0 = Instant::now();
     let result = y2025::d09::part1(&input_path);
