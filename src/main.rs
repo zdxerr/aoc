@@ -468,8 +468,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("input")
         .join("y2025")
         .join("d09")
-        // .join("input.txt");
-        .join("test.txt");
+        .join("input.txt"); // 226029968 too low!
+    // .join("test.txt");
     // .join("test2.txt"); // = 30
 
     let t0 = Instant::now();
