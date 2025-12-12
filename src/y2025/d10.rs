@@ -1,9 +1,6 @@
 use std::cmp::Reverse;
-use std::collections::BinaryHeap;
-use std::collections::{HashMap, HashSet};
-use std::fs::File;
-use std::io::{BufRead, BufReader, Read};
-use std::ops::{BitOr, BitXor};
+use std::collections::{BinaryHeap, HashSet};
+use std::ops::BitXor;
 use std::path::PathBuf;
 use std::{fs, usize};
 
@@ -45,8 +42,6 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
             index += 1;
             let mut button: u16 = 0;
             loop {
-                let x = content[index] as char;
-                // print!("{x}");
                 button = match content[index] {
                     b'(' | b' ' | b',' => button,
                     b')' => break,
@@ -74,7 +69,6 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                     0
                 }
                 n => joltage * 10 + u16::from(n.wrapping_sub(b'0')),
-                _ => panic!(),
             };
         }
         // print!(". {state:#010b}");
@@ -120,7 +114,6 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
             index += 1;
         }
     }
-    unreachable!();
 }
 
 pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
@@ -161,8 +154,6 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
             index += 1;
             let mut button: [u16; 10] = [0; 10];
             loop {
-                let x = content[index] as char;
-                // print!("{x}");
                 match content[index] {
                     b'(' | b' ' | b',' => (),
                     b')' => break,
@@ -187,7 +178,6 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                     joltages[joltage_index] =
                         joltages[joltage_index] * 10 + u16::from(n.wrapping_sub(b'0'))
                 }
-                _ => panic!(),
             };
         }
         print!(". {state:#010b}");
@@ -205,6 +195,8 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
         queue.push((Reverse(0), [0; 10]));
 
         visited.clear();
+
+        // let clicks: Vec<u64> = vec![0, buttons.len()];
 
         'check: while let Some((Reverse(count), current_state)) = queue.pop() {
             let count = count + 1;
@@ -238,6 +230,4 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
             index += 1;
         }
     }
-    unreachable!();
-    Ok(0)
 }

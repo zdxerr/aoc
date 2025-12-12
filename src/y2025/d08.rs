@@ -1,10 +1,11 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::{fs, usize};
+
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let file = File::open(input_path)?;
     let reader = BufReader::with_capacity(1024, file);
@@ -47,10 +48,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     let mut unions: Vec<usize> = vec![usize::MAX; positions.len()];
 
     for _ in 0..1000 {
-        let (distance, (a, b)) = distances.pop().unwrap();
-
-        let posa = positions[a];
-        let posb = positions[b];
+        let (_, (a, b)) = distances.pop().unwrap();
 
         let ua = unions[a];
         let ub = unions[b];
@@ -133,7 +131,7 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     let mut count: HashMap<usize, usize> = HashMap::with_capacity(100);
 
     loop {
-        let (distance, (a, b)) = distances.pop().unwrap();
+        let (_, (a, b)) = distances.pop().unwrap();
 
         let parent = match (unions[a], unions[b]) {
             (usize::MAX, usize::MAX) => {
@@ -172,12 +170,5 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
             let b = positions[b];
             return Ok(a.0 * b.0);
         }
-
-        let groups: Vec<(usize, &usize)> = unions
-            .iter()
-            .enumerate()
-            .filter(|(_, v)| **v != usize::MAX)
-            .collect();
     }
-    unreachable!();
 }
