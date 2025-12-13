@@ -1,5 +1,5 @@
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::ops::BitXor;
 use std::path::PathBuf;
 use std::{fs, usize};
@@ -116,14 +116,14 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     }
 }
 
-pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let content = fs::read(input_path)?;
 
     let mut index = 0;
 
     let mut queue: BinaryHeap<(Reverse<u64>, [u16; 10])> = BinaryHeap::with_capacity(100);
-    let mut visited: HashSet<[u16; 10]> = HashSet::with_capacity(1000);
-    let mut sum: u64 = 0;
+    let mut visited: HashMap<[u16; 10], usize> = HashMap::with_capacity(1000);
+    let mut sum: usize = 0;
 
     loop {
         let mut state: u16 = 0;
@@ -190,35 +190,123 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
 
         println!();
 
+        // fn process(joltages: &[u16; 10], buttons: &Vec<[u16; 10]>) -> bool {
+        //     let all_even = joltages.iter().all(|&x| x % 2 == 0);
+
+        //     println!(".. {joltages:?} {all_even}");
+
+        //     if all_even {
+        //         return true;
+        //     }
+
+        //     for button in buttons {
+        //         let new_joltages: [u16; 10] =
+        //             std::array::from_fn(|i| joltages[i].checked_sub(button[i]).unwrap_or(u16::MAX));
+        //         if new_joltages.iter().any(|&x| x == u16::MAX) {
+        //             println!("__ overflow");
+        //             return false;
+        //         y}
+        //         if process(&new_joltages, buttons) {
+        //             return true;
+        //         }
+        //     }
+        //     false
+        // }
+
+        // process(&joltages, &buttons);
+
+        // return Ok(1);
+
         queue.clear();
-
-        queue.push((Reverse(0), [0; 10]));
-
         visited.clear();
+        //
+        fn explore(
+            joltages: [u16; 10],
+            buttons: &Vec<[u16; 10]>,
+            mut min: usize,
+            visited: &mut HashMap<[u16; 10], usize>,
+        ) -> Option<usize> {
+            let mut queue: BinaryHeap<(Reverse<usize>, [u16; 10])> = BinaryHeap::with_capacity(100);
 
-        // let clicks: Vec<u64> = vec![0, buttons.len()];
+            queue.push((Reverse(0), joltages));
 
-        'check: while let Some((Reverse(count), current_state)) = queue.pop() {
-            let count = count + 1;
-            for button in &buttons {
-                let new_state = std::array::from_fn(|i| current_state[i] + button[i]);
-                if visited.contains(&new_state) {
+            // let mut min: usize = usize::MAX;
+            while let Some((Reverse(count), joltages)) = queue.pop() {
+                if count > min {
                     continue;
                 }
-                visited.insert(new_state);
+                let all_zero = joltages.iter().all(|&x| x == 0);
+                let all_even = joltages.iter().all(|&x| x % 2 == 0);
 
-                if new_state.iter().zip(joltages).any(|(a, b)| a > &b) {
-                    continue;
+                println!(
+                    ".. {count} / {joltages:?}, even: {all_even}, zero: {all_zero}, min: {min}"
+                );
+
+                if all_zero {
+                    return Some(count);
                 }
-                if new_state == joltages {
-                    sum += count;
-                    break 'check;
+
+                if let Some(last_count) = visited.get(&joltages) {
+                    if *last_count <= count {
+                        continue;
+                    }
+                };
+                visited.insert(joltages, count);
+
+                if all_even {
+                    let new_joltages: [u16; 10] =
+                        std::array::from_fn(|i| joltages[i].strict_div(2));
+                    if let Some(new_count) = explore(new_joltages, buttons, min, visited) {
+                        min = min.min(count + 2 * new_count);
+                    }
+                    // continue;
                 }
-                // println!("PUSH {new_state:?} {count} (expected: {joltages:?})");
-                queue.push((Reverse(count), new_state));
+
+                for button in buttons {
+                    let new_joltages: [u16; 10] = std::array::from_fn(|i| {
+                        joltages[i].checked_sub(button[i]).unwrap_or(u16::MAX)
+                    });
+                    if new_joltages.iter().any(|&x| x == u16::MAX) {
+                        println!("__ overflow");
+                        continue;
+                    }
+                    queue.push((Reverse(count + 1), new_joltages));
+                }
             }
+            Some(min)
         }
 
+        if let Some(result) = explore(joltages, &buttons, usize::MAX, &mut visited) {
+            sum += result;
+            println!("## {result:?}");
+        } else {
+            panic!("unexpected result");
+        }
+
+        // visited.clear();
+
+        // // let clicks: Vec<u64> = vec![0, buttons.len()];
+
+        // 'check: while let Some((Reverse(count), current_state)) = queue.pop() {
+        //     let count = count + 1;
+        //     for button in &buttons {
+        //         let new_state = std::array::from_fn(|i| current_state[i] + button[i]);
+        //         if visited.contains(&new_state) {
+        //             continue;
+        //         }
+        //         visited.insert(new_state);
+
+        //         if new_state.iter().zip(joltages).any(|(a, b)| a > &b) {
+        //             continue;
+        //         }
+        //         if new_state == joltages {
+        //             sum += count;
+        //             break 'check;
+        //         }
+        //         // println!("PUSH {new_state:?} {count} (expected: {joltages:?})");
+        //         queue.push((Reverse(count), new_state));
+        //     }
+        // }
         loop {
             if index >= content.len() {
                 return Ok(sum);
