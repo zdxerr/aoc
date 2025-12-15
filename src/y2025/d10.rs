@@ -128,7 +128,7 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     loop {
         let mut state: u16 = 0;
         let mut state_index = 0;
-        let mut buttons: Vec<[u16; 10]> = Vec::new();
+        let mut buttons: Vec<[bool; 10]> = Vec::new();
         let mut joltages: [u16; 10] = [0; 10];
         let mut joltage_index: usize = 0;
 
@@ -152,13 +152,13 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         }
         'buttons: loop {
             index += 1;
-            let mut button: [u16; 10] = [0; 10];
+            let mut button: [bool; 10] = [false; 10];
             loop {
                 match content[index] {
                     b'(' | b' ' | b',' => (),
                     b')' => break,
                     b'{' => break 'buttons,
-                    n => button[n.wrapping_sub(b'0') as usize] = 1,
+                    n => button[n.wrapping_sub(b'0') as usize] = true,
                 };
                 index += 1;
             }
@@ -216,72 +216,108 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         // process(&joltages, &buttons);
 
         // return Ok(1);
-
-        queue.clear();
-        visited.clear();
         //
-        fn explore(
+        // to slow, need to ignore the order of button presses....
+        //
+        fn solve(
             joltages: [u16; 10],
-            buttons: &Vec<[u16; 10]>,
-            mut min: usize,
-            visited: &mut HashMap<[u16; 10], usize>,
-        ) -> Option<usize> {
-            let mut queue: BinaryHeap<(Reverse<usize>, [u16; 10])> = BinaryHeap::with_capacity(100);
+            buttons: &Vec<[bool; 10]>,
+            // mut min: usize,
+            // visited: &mut HashMap<[u16; 10], usize>,
+        ) -> usize {
+            let b_len = buttons.len();
 
-            queue.push((Reverse(0), joltages));
+            let upper_bound: u16 = joltages.iter().sum();
 
-            // let mut min: usize = usize::MAX;
-            while let Some((Reverse(count), joltages)) = queue.pop() {
-                if count > min {
-                    continue;
-                }
-                let all_zero = joltages.iter().all(|&x| x == 0);
-                let all_even = joltages.iter().all(|&x| x % 2 == 0);
+            println!(" {buttons:?} - {b_len} / upper bound: {upper_bound}");
 
-                println!(
-                    ".. {count} / {joltages:?}, even: {all_even}, zero: {all_zero}, min: {min}"
-                );
+            let mut push = vec![0; buttons.len()];
 
-                if all_zero {
-                    return Some(count);
-                }
+            for (button_index, button) in buttons.iter().enumerate() {
+                let push: Vec<u16> = push
+                    .iter()
+                    .enumerate()
+                    .map(|(n, b)| b + ((n == button_index) as u16))
+                    .collect();
+                // let mut push: Vec<u16> = push
+                //     .iter()
+                //     .zip(button)
+                //     .map(|(p, b)| p + (*b as u16))
+                //     .collect();
 
-                if let Some(last_count) = visited.get(&joltages) {
-                    if *last_count <= count {
-                        continue;
-                    }
-                };
-                visited.insert(joltages, count);
-
-                if all_even {
-                    let new_joltages: [u16; 10] =
-                        std::array::from_fn(|i| joltages[i].strict_div(2));
-                    if let Some(new_count) = explore(new_joltages, buttons, min, visited) {
-                        min = min.min(count + 2 * new_count);
-                    }
-                    // continue;
-                }
-
-                for button in buttons {
-                    let new_joltages: [u16; 10] = std::array::from_fn(|i| {
-                        joltages[i].checked_sub(button[i]).unwrap_or(u16::MAX)
-                    });
-                    if new_joltages.iter().any(|&x| x == u16::MAX) {
-                        println!("__ overflow");
-                        continue;
-                    }
-                    queue.push((Reverse(count + 1), new_joltages));
-                }
+                println!(" : {push:?}");
             }
-            Some(min)
+            0
         }
 
-        if let Some(result) = explore(joltages, &buttons, usize::MAX, &mut visited) {
-            sum += result;
-            println!("## {result:?}");
-        } else {
-            panic!("unexpected result");
-        }
+        solve(joltages, &buttons);
+        // break;
+
+        // queue.clear();
+        // visited.clear();
+        // //
+        // fn explore(
+        //     joltages: [u16; 10],
+        //     buttons: &Vec<[u16; 10]>,
+        //     mut min: usize,
+        //     visited: &mut HashMap<[u16; 10], usize>,
+        // ) -> Option<usize> {
+        //     let mut queue: BinaryHeap<(Reverse<usize>, [u16; 10])> = BinaryHeap::with_capacity(100);
+
+        //     queue.push((Reverse(0), joltages));
+
+        //     // let mut min: usize = usize::MAX;
+        //     while let Some((Reverse(count), joltages)) = queue.pop() {
+        //         if count > min {
+        //             continue;
+        //         }
+        //         let all_zero = joltages.iter().all(|&x| x == 0);
+        //         let all_even = joltages.iter().all(|&x| x % 2 == 0);
+
+        //         println!(
+        //             ".. {count} / {joltages:?}, even: {all_even}, zero: {all_zero}, min: {min}"
+        //         );
+
+        //         if all_zero {
+        //             return Some(count);
+        //         }
+
+        //         if let Some(last_count) = visited.get(&joltages) {
+        //             if *last_count <= count {
+        //                 continue;
+        //             }
+        //         };
+        //         visited.insert(joltages, count);
+
+        //         if all_even {
+        //             let new_joltages: [u16; 10] =
+        //                 std::array::from_fn(|i| joltages[i].strict_div(2));
+        //             if let Some(new_count) = explore(new_joltages, buttons, min, visited) {
+        //                 min = min.min(count + 2 * new_count);
+        //             }
+        //             // continue;
+        //         }
+
+        //         for button in buttons {
+        //             let new_joltages: [u16; 10] = std::array::from_fn(|i| {
+        //                 joltages[i].checked_sub(button[i]).unwrap_or(u16::MAX)
+        //             });
+        //             if new_joltages.iter().any(|&x| x == u16::MAX) {
+        //                 println!("__ overflow");
+        //                 continue;
+        //             }
+        //             queue.push((Reverse(count + 1), new_joltages));
+        //         }
+        //     }
+        //     Some(min)
+        // }
+
+        // if let Some(result) = explore(joltages, &buttons, usize::MAX, &mut visited) {
+        //     sum += result;
+        //     println!("## {result:?}");
+        // } else {
+        //     panic!("unexpected result");
+        // }
 
         // visited.clear();
 

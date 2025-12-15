@@ -32,6 +32,54 @@ macro_rules! rgb_print {
     };
 }
 
+// macro_rules! time_it {
+//     ($name:expr, $expr:expr) => {{
+//         let start = Instant::now();
+//         let result = $expr;
+//         let duration = start.elapsed();
+//         println!("{} took {:.3?}", $name, duration);
+//         result
+//     }};
+
+//     ($expr:expr) => {{
+//         let start = Instant::now();
+//         let result = $expr;
+//         let duration = start.elapsed();
+//         println!("Expression took {:.3?}", duration);
+//         result
+//     }};
+// }
+macro_rules! run {
+    ($module:item, $name:literal) => {{
+        // let start = Instant::now();
+        // let result = $expr;
+        // let duration = start.elapsed();
+        // println!("{} took {:.3?}", $name, duration);
+        // result
+
+        let year = $year;
+        let day = $day;
+        let title = $name;
+        rgb_print!(156, 207, 216, "{year}.{day:02} ");
+        rgb_print!(224, 222, 244, "{title:20}");
+        println!();
+        let input_path = env::current_dir()?
+            .join("input")
+            .join("y2025")
+            .join("d01")
+            .join("input.txt");
+        // .join("test.txt");
+
+        let t0 = Instant::now();
+        let result = y2025::d01::part1(&input_path);
+
+        let duration = t0.elapsed().as_micros();
+        rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
+        rgb_print!(196, 167, 231, "{result:?}");
+        println!();
+    }};
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let year = 2023;
     let day = 2;
@@ -446,8 +494,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("input")
         .join("y2025")
         .join("d10")
-        .join("input.txt"); // 226029968 too low!
-    // .join("test.txt");
+        // .join("input.txt"); // 226029968 too low!
+        .join("test.txt");
     // .join("test2.txt"); // = 30
 
     let t0 = Instant::now();
@@ -498,10 +546,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .join("input")
         .join("y2025")
         .join("d12")
-        // .join("input.txt"); // 226029968 too low!
-        .join("test.txt");
-    // .join("test2.txt"); // = 30
-
+        .join("input.txt");
     let t0 = Instant::now();
     let result = y2025::d12::part1(&input_path);
     let duration = t0.elapsed().as_micros();
@@ -514,5 +559,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
     rgb_print!(196, 167, 231, "{result:?}");
     println!();
+
+    // run!(y2025::d12, "Christmas Tree Farm");
     Ok(())
 }
