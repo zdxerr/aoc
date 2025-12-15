@@ -180,15 +180,15 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                 }
             };
         }
-        print!(". {state:#010b}");
+        // print!(". {state:#010b}");
 
-        for button in &buttons {
-            print!(" | {button:?}");
-        }
+        // for button in &buttons {
+        //     print!(" | {button:?}");
+        // }
 
-        print!(" {joltages:?}");
+        // print!(" {joltages:?}");
 
-        println!();
+        // println!();
 
         // fn process(joltages: &[u16; 10], buttons: &Vec<[u16; 10]>) -> bool {
         //     let all_even = joltages.iter().all(|&x| x % 2 == 0);
@@ -229,7 +229,7 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
 
             let upper_bound: u16 = joltages.iter().sum();
 
-            println!(" {buttons:?} - {b_len} / upper bound: {upper_bound}");
+            // println!(" {buttons:?} - {b_len} / upper bound: {upper_bound}");
 
             let mut push = vec![0; buttons.len()];
 
@@ -245,7 +245,7 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                 //     .map(|(p, b)| p + (*b as u16))
                 //     .collect();
 
-                println!(" : {push:?}");
+                // println!(" : {push:?}");
             }
             0
         }
