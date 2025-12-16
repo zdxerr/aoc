@@ -4,7 +4,7 @@ use std::path::PathBuf;
 const NL: u8 = b'\n';
 const ROLL: u8 = b'@';
 
-pub fn part1(input_path: &PathBuf) -> usize {
+pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let mut sum: usize = 0;
     let grid = fs::read(input_path).unwrap();
 
@@ -35,10 +35,10 @@ pub fn part1(input_path: &PathBuf) -> usize {
             sum += 1;
         }
     }
-    sum
+    Ok(sum)
 }
 
-pub fn part2(input_path: &PathBuf) -> usize {
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let mut sum: usize = 0;
     let mut grid = fs::read(&input_path).unwrap();
     let row_len = grid.iter().position(|c| c == &NL).unwrap();
@@ -76,5 +76,5 @@ pub fn part2(input_path: &PathBuf) -> usize {
         }
     }
 
-    sum
+    Ok(sum)
 }

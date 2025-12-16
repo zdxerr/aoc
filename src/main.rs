@@ -1,9 +1,9 @@
+mod y2015;
 mod y2023;
 mod y2025;
 
-use std::io::{BufRead, BufReader};
+use std::env;
 use std::time::Instant;
-use std::{env, fs};
 
 // #[cfg(windows)]
 // {
@@ -54,23 +54,33 @@ macro_rules! run {
             .join("input.txt");
         let t0 = Instant::now();
         let result = $year::$day::part1(&input_path);
-        let duration = t0.elapsed().as_micros();
-        rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
-        rgb_print!(196, 167, 231, "{result:?}");
+        let duration = t0.elapsed().as_secs_f64() * 1000.0;
+        rgb_print!(144, 140, 170, " 1 ");
+        rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
+        match result {
+            Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
+            Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
+        }
         println!();
         let t0 = Instant::now();
         let result = $year::$day::part2(&input_path);
-        let duration = t0.elapsed().as_micros();
-        rgb_print!(246, 193, 119, "⏱ {duration:9}us ");
-        rgb_print!(196, 167, 231, "{result:?}");
+        let duration = t0.elapsed().as_secs_f64() * 1000.0;
+        rgb_print!(144, 140, 170, " 2 ");
+        rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
+        match result {
+            Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
+            Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
+        }
         println!();
     }};
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // run!(y2023, d02, "Cube Conundrum");
-    //
     let t0 = Instant::now();
+    // run!(y2023, d02, "Cube Conundrum");
+    run!(y2015, d01, "Not Quite Lisp");
+    run!(y2015, d02, "I Was Told There Would Be No Math");
+    run!(y2015, d03, "Perfectly Spherical Houses in a Vacuum");
 
     run!(y2025, d01, "Secret Entrance");
     run!(y2025, d02, "Gift Shop");
@@ -84,8 +94,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2025, d10, "Factory");
     run!(y2025, d11, "Reactor");
     run!(y2025, d12, "Christmas Tree Farm");
-    let duration = t0.elapsed().as_micros();
-    rgb_print!(246, 193, 119, "## ⏱ {duration:9}us ");
+    let duration = t0.elapsed().as_secs_f64() * 1000.0;
+    rgb_print!(156, 207, 216, "Total");
+    println!();
+    rgb_print!(246, 193, 119, "   {duration:8.3}ms ⏱ ");
     println!();
 
     Ok(())
