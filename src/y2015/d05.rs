@@ -1,27 +1,10 @@
 use std::fs::File;
-use std::io;
-use std::io::BufReader;
-use std::io::prelude::*;
+use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
-
-// fn process_file(path: &str) -> io::Result<Vec<i32>> {
-//     let file = File::open(path)?;
-//     let reader = BufReader::new(file);
-
-//     let numbers: Vec<i32> = reader
-//         .lines()
-//         .map(|res| res?) // Now OK! Because the whole function returns Result<_, io::Error>
-//         .filter(|line| !line.trim().starts_with('#'))
-//         .filter_map(|line| line.trim().parse::<i32>().ok())
-//         .collect();
-
-//     Ok(numbers)
-// }
 
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let reader = BufReader::new(File::open(input_path)?);
-
-    let count = reader
+    Ok(reader
         .lines()
         .map(|res| res.unwrap())
         .filter(|line| {
@@ -30,7 +13,6 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             for idx in 0..line.len() {
                 match line.get(idx..idx + 2) {
                     Some("ab" | "cd" | "pq" | "xy") => {
-                        println!(" {line} XX");
                         return false;
                     }
                     Some(s) => {
@@ -45,24 +27,10 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                     Some("a" | "e" | "i" | "o" | "u") => 1,
                     _ => 0,
                 }
-                // aeiou |= match line.get(idx..idx + 1) {
-                //     Some("a") => 0b1,
-                //     Some("e") => 0b10,
-                //     Some("i") => 0b100,
-                //     Some("o") => 0b1000,
-                //     Some("u") => 0b10000,
-                //     _ => 0b0,
-                // }
             }
-            // let ones = aeiou.count_ones();
-            // let x = aeiou.count_ones() >= 3 && twice;
-            println!(" {line} {aeiou:#b} {twice}");
-            aeiou >= 3 && twice //too low
-            // a + e + i + o + u >= 3
-            // true
+            aeiou >= 3 && twice
         })
-        .count();
-    Ok(count)
+        .count())
 }
 
 // --- Part Two ---
@@ -93,6 +61,38 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
 
 pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let reader = BufReader::new(File::open(input_path)?);
-    reader.bytes();
-    Err("not implemented".into())
+    Ok(reader
+        .lines()
+        .map(|res| res.unwrap())
+        .filter(|line| {
+            let mut triplet = false;
+            let mut double = false;
+            for idx in 0..line.len() {
+                triplet |= match line.get(idx..idx + 3) {
+                    Some(s) => {
+                        let mut chars = s.chars();
+                        let (a, _, c) = (chars.next(), chars.next(), chars.next());
+                        a == c
+                    }
+                    _ => false,
+                };
+
+                if let Some(s0) = line.get(idx..idx + 2) {
+                    for idx in idx + 2..line.len() {
+                        if let Some(s1) = line.get(idx..idx + 2) {
+                            if s0 == s1 {
+                                double = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if triplet && double {
+                    return true;
+                }
+            }
+            false
+        })
+        .count())
 }
