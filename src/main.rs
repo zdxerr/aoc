@@ -77,10 +77,15 @@ macro_rules! run {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let t0 = Instant::now();
-    // run!(y2023, d02, "Cube Conundrum");
     run!(y2015, d01, "Not Quite Lisp");
     run!(y2015, d02, "I Was Told There Would Be No Math");
     run!(y2015, d03, "Perfectly Spherical Houses in a Vacuum");
+    run!(y2015, d04, "The Ideal Stocking Stuffer");
+    run!(y2015, d05, "Doesn't He Have Intern-Elves For This?");
+    run!(y2015, d06, "Probably a Fire Hazard");
+    run!(y2015, d07, "Some Assembly Required");
+
+    // run!(y2023, d02, "Cube Conundrum");
 
     run!(y2025, d01, "Secret Entrance");
     run!(y2025, d02, "Gift Shop");
