@@ -30,7 +30,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             for idx in 0..line.len() {
                 match line.get(idx..idx + 2) {
                     Some("ab" | "cd" | "pq" | "xy") => {
-                        println!(" {line} XX");
+                        // println!(" {line} XX");
                         return false;
                     }
                     Some(s) => {
@@ -56,7 +56,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             }
             // let ones = aeiou.count_ones();
             // let x = aeiou.count_ones() >= 3 && twice;
-            println!(" {line} {aeiou:#b} {twice}");
+            // println!(" {line} {aeiou:#b} {twice}");
             aeiou >= 3 && twice //too low
             // a + e + i + o + u >= 3
             // true
