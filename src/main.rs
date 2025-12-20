@@ -44,8 +44,7 @@ macro_rules! run {
             year.strip_prefix("y").unwrap(),
             day.strip_prefix("d").unwrap(),
         );
-        rgb_print!(224, 222, 244, "{}", $name);
-        println!();
+        rgb_print!(224, 222, 244, "{:40}", $name);
 
         let input_path = env::current_dir()?
             .join("input")
@@ -55,17 +54,16 @@ macro_rules! run {
         let t0 = Instant::now();
         let result = $year::$day::part1(&input_path);
         let duration = t0.elapsed().as_secs_f64() * 1000.0;
-        rgb_print!(144, 140, 170, " 1 ");
+        rgb_print!(144, 140, 170, "   1 ");
         rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
         match result {
             Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
             Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
         }
-        println!();
         let t0 = Instant::now();
         let result = $year::$day::part2(&input_path);
         let duration = t0.elapsed().as_secs_f64() * 1000.0;
-        rgb_print!(144, 140, 170, " 2 ");
+        rgb_print!(144, 140, 170, "   2 ");
         rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
         match result {
             Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
@@ -84,6 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2015, d05, "Doesn't He Have Intern-Elves For This?");
     run!(y2015, d06, "Probably a Fire Hazard");
     run!(y2015, d07, "Some Assembly Required");
+    run!(y2015, d08, "Matchsticks");
 
     // run!(y2023, d02, "Cube Conundrum");
 
