@@ -83,8 +83,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2015, d06, "Probably a Fire Hazard");
     run!(y2015, d07, "Some Assembly Required");
     run!(y2015, d08, "Matchsticks");
+    run!(y2015, d09, "All in a Single Night");
+    run!(y2015, d10, "Elves Look, Elves Say");
+    run!(y2015, d11, "Corporate Policy");
+    run!(y2015, d12, "JSAbacusFramework.io");
+    run!(y2015, d13, "Knights of the Dinner Table");
 
-    // run!(y2023, d02, "Cube Conundrum");
+    run!(y2023, d02, "Cube Conundrum");
 
     run!(y2025, d01, "Secret Entrance");
     run!(y2025, d02, "Gift Shop");
