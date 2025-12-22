@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::mem;
 use std::path::PathBuf;
 // use std::str;
 // All permutations with Heaps Algorithm?
@@ -53,7 +54,28 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             splitted[3].parse::<i64>()? * if splitted[2] == "lose" { -1 } else { 1 },
         );
     }
-    dbg!(&persons);
+    // dbg!(&persons);
+
+    let mut counter = vec![0; persons.len()];
+    let mut a: Vec<&str> = persons.into_keys().collect();
+    println!(" {a:?}");
+    let mut i = 1;
+    while i < a.len() {
+        if counter[i] < i {
+            if i % 2 == 0 {
+                a.swap(0, i);
+            } else {
+                a.swap(counter[i], i);
+            }
+            // println!(" {a:?}");
+
+            counter[i] += 1;
+            i = 1;
+        } else {
+            counter[i] = 0;
+            i += 1;
+        }
+    }
 
     Err("not implemented".into())
 }
