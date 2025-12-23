@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::fs;
-use std::mem;
 use std::path::PathBuf;
 // use std::str;
 // All permutations with Heaps Algorithm?
