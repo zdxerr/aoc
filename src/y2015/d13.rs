@@ -41,13 +41,13 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     let mut persons: HashMap<&str, HashMap<&str, i64>> = HashMap::with_capacity(10);
     for line in content.lines() {
         let splitted: Vec<&str> = line.split(' ').collect();
-        println!(
-            "{}->{} {} {}",
-            splitted[0],
-            splitted[splitted.len() - 1].strip_suffix(".").unwrap(),
-            splitted[2],
-            splitted[3]
-        );
+        // println!(
+        //     "{}->{} {} {}",
+        //     splitted[0],
+        //     splitted[splitted.len() - 1].strip_suffix(".").unwrap(),
+        //     splitted[2],
+        //     splitted[3]
+        // );
         persons.entry(splitted[0]).or_default().insert(
             splitted[splitted.len() - 1].strip_suffix('.').unwrap(),
             splitted[3].parse::<i64>()? * if splitted[2] == "lose" { -1 } else { 1 },
@@ -57,7 +57,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
 
     let mut counter = vec![0; persons.len()];
     let mut a: Vec<&str> = persons.into_keys().collect();
-    println!(" {a:?}");
+    // println!(" {a:?}");
     let mut i = 1;
     while i < a.len() {
         if counter[i] < i {
