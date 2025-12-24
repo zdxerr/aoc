@@ -88,6 +88,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2015, d11, "Corporate Policy");
     run!(y2015, d12, "JSAbacusFramework.io");
     run!(y2015, d13, "Knights of the Dinner Table");
+    run!(y2015, d14, "Reindeer Olympics");
+    run!(y2015, d15, "Science for Hungry People");
+    run!(y2015, d16, "Aunt Sue");
+    run!(y2015, d17, "No Such Thing as Too Much");
+    run!(y2015, d18, "Like a GIF For Your Yard");
+    run!(y2015, d19, "Medicine for Rudolph");
+    run!(y2015, d20, "Infinite Elves and Infinite Houses");
+    run!(y2015, d21, "RPG Simulator 20XX");
+    run!(y2015, d22, "Wizard Simulator 20XX");
+    run!(y2015, d23, "Opening the Turing Lock");
+    run!(y2015, d24, "It Hangs in the Balance");
+    run!(y2015, d25, "Let It Snow");
 
     run!(y2023, d02, "Cube Conundrum");
 
