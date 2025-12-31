@@ -1,5 +1,6 @@
 mod y2015;
 mod y2023;
+mod y2024;
 mod y2025;
 
 use std::env;
@@ -102,6 +103,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2015, d25, "Let It Snow");
 
     run!(y2023, d02, "Cube Conundrum");
+
+    run!(y2024, d01, "");
+    run!(y2024, d02, "");
+    run!(y2024, d03, "");
+    run!(y2024, d04, "");
+    run!(y2024, d05, "");
+    run!(y2024, d06, "");
+    run!(y2024, d07, "");
+    run!(y2024, d08, "");
+    run!(y2024, d09, "");
+    run!(y2024, d10, "");
+    run!(y2024, d11, "");
+    run!(y2024, d12, "");
+    run!(y2024, d13, "");
+    run!(y2024, d14, "");
+    run!(y2024, d15, "");
+    run!(y2024, d16, "");
+    run!(y2024, d17, "");
+    run!(y2024, d18, "");
+    run!(y2024, d19, "");
+    run!(y2024, d20, "");
+    run!(y2024, d21, "");
+    run!(y2024, d22, "");
+    run!(y2024, d23, "");
+    run!(y2024, d24, "");
+    run!(y2024, d25, "");
 
     run!(y2025, d01, "Secret Entrance");
     run!(y2025, d02, "Gift Shop");
