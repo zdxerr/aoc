@@ -267,10 +267,6 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
     let mut word_c = 0x98badcfeu32;
     let mut word_d = 0x10325476u32;
 
-    // construct the 64 element constant table.
-    // let table = VALUE_TABLE;
-    // construct_value_table();
-
     // let M[0 .. N-1] = words of resulting message, where N is multiple of 16
     for chunk in v.chunks_exact_mut(64) {
         let x = convert_u8_chunk_to_u32(chunk);
@@ -336,6 +332,7 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
 * 3. With the last 64 bits, append the length in 64 bits
 *    (in lower-order bits first).
 */
+#[inline]
 fn bit_padding(input: &str) -> Vec<u8> {
     let bit_length = input.len() * 8;
     input
