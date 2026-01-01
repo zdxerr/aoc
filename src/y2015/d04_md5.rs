@@ -1,4 +1,5 @@
 use std::convert::TryInto;
+use std::sync::LazyLock;
 /**
 *
 * The MD5 Message-Digest Algorithm, written in Rust.
@@ -25,12 +26,8 @@ use std::convert::TryInto;
 * The function is specified as:
 * K[i] = floor(2^32 * abs(sin(i+1)))
 */
-fn table_construction_function(i: u32) -> u32 {
-    let x: f64 = i as f64;
-    let sin_eval = x.sin().abs();
-    // note: 4294967296 == 2^32
-    return (4294967296.0 * sin_eval) as u32;
-}
+static VALUE_TABLE: LazyLock<[u32; 65]> =
+    LazyLock::new(|| core::array::from_fn(|idx| (4294967296.0 * (idx as f64).sin().abs()) as u32));
 
 /**
 * 4 auxiliary functions that take 3 32-bit
@@ -75,7 +72,7 @@ fn round_one_operations(
     mut b: u32,
     mut c: u32,
     mut d: u32,
-    table: &Vec<u32>,
+    table: &LazyLock<[u32; 65]>,
     x: &Vec<u32>,
 ) -> [u32; 4] {
     macro_rules! round1 {
@@ -121,7 +118,7 @@ fn round_two_operations(
     mut b: u32,
     mut c: u32,
     mut d: u32,
-    table: &Vec<u32>,
+    table: &LazyLock<[u32; 65]>,
     x: &Vec<u32>,
 ) -> [u32; 4] {
     macro_rules! round2 {
@@ -167,7 +164,7 @@ fn round_three_operations(
     mut b: u32,
     mut c: u32,
     mut d: u32,
-    table: &Vec<u32>,
+    table: &LazyLock<[u32; 65]>,
     x: &Vec<u32>,
 ) -> [u32; 4] {
     macro_rules! round3 {
@@ -213,7 +210,7 @@ fn round_four_operations(
     mut b: u32,
     mut c: u32,
     mut d: u32,
-    table: &Vec<u32>,
+    table: &LazyLock<[u32; 65]>,
     x: &Vec<u32>,
 ) -> [u32; 4] {
     macro_rules! round4 {
@@ -254,26 +251,12 @@ fn round_four_operations(
 * utility function to iterate over our slice of u8 ints
 * and convert into a vector of unsigned 32 bit ints
 */
+#[inline]
 fn convert_u8_chunk_to_u32(chunk: &mut [u8]) -> Vec<u32> {
-    let mut x: Vec<u32> = Vec::new();
-
-    let mut count = 0;
-    let mut temporary_vec: Vec<u8> = Vec::new();
-    // iterate over our block and take
-    // our 8 bit ints and convert them to
-    // 32 bit integers
-    for i in 0..chunk.len() {
-        temporary_vec.push(chunk[i]);
-        count += 1;
-        if count == 4 {
-            let temp_arr: [u8; 4] = vec_to_array(temporary_vec.clone());
-            let value = u32::from_ne_bytes(temp_arr);
-            x.push(value);
-            count = 0;
-            temporary_vec.clear();
-        }
-    }
-    return x;
+    chunk
+        .chunks(4)
+        .map(|c| u32::from_ne_bytes(c.try_into().unwrap()))
+        .collect()
 }
 
 fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
@@ -285,7 +268,8 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
     let mut word_d = 0x10325476u32;
 
     // construct the 64 element constant table.
-    let table = construct_value_table();
+    // let table = VALUE_TABLE;
+    // construct_value_table();
 
     // let M[0 .. N-1] = words of resulting message, where N is multiple of 16
     for chunk in v.chunks_exact_mut(64) {
@@ -299,14 +283,14 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
         let word_dd = word_d;
 
         // execute round 1
-        let result = round_one_operations(word_a, word_b, word_c, word_d, &table, &x);
+        let result = round_one_operations(word_a, word_b, word_c, word_d, &VALUE_TABLE, &x);
         word_a = result[0];
         word_b = result[1];
         word_c = result[2];
         word_d = result[3];
 
         // execute round 2
-        let result = round_two_operations(word_a, word_b, word_c, word_d, &table, &x);
+        let result = round_two_operations(word_a, word_b, word_c, word_d, &VALUE_TABLE, &x);
 
         word_a = result[0];
         word_b = result[1];
@@ -314,14 +298,14 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
         word_d = result[3];
 
         // execute round 3
-        let result = round_three_operations(word_a, word_b, word_c, word_d, &table, &x);
+        let result = round_three_operations(word_a, word_b, word_c, word_d, &VALUE_TABLE, &x);
         word_a = result[0];
         word_b = result[1];
         word_c = result[2];
         word_d = result[3];
 
         // execute round 4
-        let result = round_four_operations(word_a, word_b, word_c, word_d, &table, &x);
+        let result = round_four_operations(word_a, word_b, word_c, word_d, &VALUE_TABLE, &x);
         word_a = result[0];
         word_b = result[1];
         word_c = result[2];
@@ -335,16 +319,6 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
         word_d = word_d.wrapping_add(word_dd);
     }
 
-    // // format and return the final result, which
-    // // is a 128-bit digest string.
-    // let message_digest = format!(
-    //     "{:08x}{:08x}{:08x}{:08x}",
-    //     word_a.swap_bytes(),
-    //     word_b.swap_bytes(),
-    //     word_c.swap_bytes(),
-    //     word_d.swap_bytes()
-    // );
-    // return message_digest;
     (
         word_a.swap_bytes(),
         word_b.swap_bytes(),
@@ -363,53 +337,13 @@ fn compute_md5_digest(mut v: Vec<u8>) -> (u32, u32, u32, u32) {
 *    (in lower-order bits first).
 */
 fn bit_padding(input: &str) -> Vec<u8> {
-    let mut input_vector: Vec<u8> = convert_str_to_vec(input);
-    let bit_length: u64 = (input.len() as u64) * 8u64; // todo - add support for > 2^64 bit size
-
-    // 128_u8 is the equivalent of padding 1 as an unsigned 8-bit integer
-    // with lower-order bits first
-    input_vector.push(128_u8);
-    //check if bit length % 512 is 448 (64 less than 512)
-    while (input_vector.len() * 8) % 512 != 448 {
-        input_vector.push(0_u8); // push in another 8-bit 0 padded value until the correct
-        // result is reached;
-    }
-
-    let length_bits_as_u8_array = split_u64_to_u8_array(bit_length);
-    input_vector.extend(length_bits_as_u8_array);
-
-    return input_vector;
-}
-
-fn split_u64_to_u8_array(s: u64) -> [u8; 8] {
-    let u8_array = [
-        s as u8,
-        (s >> 8) as u8,
-        (s >> 16) as u8,
-        (s >> 24) as u8,
-        (s >> 32) as u8,
-        (s >> 40) as u8,
-        (s >> 48) as u8,
-        (s >> 56) as u8,
-    ];
-    return u8_array;
-}
-
-fn construct_value_table() -> Vec<u32> {
-    let mut t: Vec<u32> = Vec::new();
-    t.push(0x00000000);
-    for i in 1..=64 {
-        t.push(table_construction_function(i));
-    }
-    return t;
-}
-
-// this should only work with utf-8 encoding and not full unicode support
-// due to multi-byte unicode chars
-fn convert_str_to_vec(input: &str) -> Vec<u8> {
-    let mut byte_vec: Vec<u8> = Vec::new();
-    byte_vec.extend(input.as_bytes());
-    return byte_vec;
+    let bit_length = input.len() * 8;
+    input
+        .bytes()
+        .chain([128])
+        .chain(std::iter::repeat(0).take((448 - ((bit_length + 8) % 512)) / 8))
+        .chain(bit_length.to_le_bytes())
+        .collect()
 }
 
 /**
