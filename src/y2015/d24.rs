@@ -1,70 +1,97 @@
+use std::collections::HashSet;
 use std::fs;
-// use std::io::BufReader;
 use std::path::PathBuf;
 
-pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(input_path)?;
-    // let _reader = BufReader::new(fs::File::open(input_path)?);
-    //
-    let packages: Vec<u16> = content.lines().map(|line| line.parse()).flatten().collect();
+    let mut packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
+    let boundary = packages.iter().sum::<u64>().div_euclid(3);
+    packages.sort();
+    packages.reverse();
 
-    dbg!(&packages);
+    let mut range: Vec<_> = (1..2_usize.pow(packages.len() as u32)).collect();
+    range.sort_unstable_by_key(|v| v.count_ones());
 
-    for mut n in 0..3_usize.pow(packages.len() as u32) {
-        // println!("{n}");
-        // let mut v = vec![];
-        let mut a = 0;
-        let mut al = 0;
-        let mut aqe = 1;
-        let mut b = 0;
-        let mut bl = 0;
-        let mut c = 0;
-        let mut cl = 0;
-        // print!(".{n}");
-        for p in 0..packages.len() {
-            // let s = n.rem_euclid(3);
-            // v.push(n.rem_euclid(3));
-            // n = n.div_euclid(3);
+    let mut max_package_count = packages.len();
+    let mut min_quantum_entaglement: u64 = packages.iter().product();
 
-            match n.rem_euclid(3) {
-                0 => {
-                    a += packages[p];
-                    al += 1;
-                    aqe *= packages[p];
-                }
-                1 => {
-                    b += packages[p];
-                    bl += 1;
-                }
-                2 => {
-                    c += packages[p];
-                    cl += 1;
-                }
-                _ => panic!("unexpected compartment: {}", n.rem_euclid(3)),
+    for n in range.iter_mut() {
+        let package_count = n.count_ones() as usize;
+        if package_count > max_package_count {
+            break;
+        }
+
+        let start = n.trailing_zeros() as usize;
+        let mut sum = 0;
+        let mut set = HashSet::new();
+
+        *n >>= start;
+
+        for index in start..packages.len() {
+            let bit = *n & 1 == 1;
+            if bit {
+                let p = packages[index];
+                sum += p;
+                set.insert(p);
             }
-            n = n.div_euclid(3);
+            *n >>= 1;
+            if *n == 0 {
+                break;
+            }
         }
-        println!("Not found {a} ({al}, {aqe}), {b} ({bl}), {c} ({cl})");
 
-        if a == b && a == c {
-            println!("Found {a} ({al}, {aqe}), {b} ({bl}), {c} ({cl})");
+        if sum == boundary {
+            max_package_count = package_count;
+            min_quantum_entaglement = min_quantum_entaglement.min(set.iter().product());
         }
-        // println!(" _ {v:?}");
     }
-    // def get_all_combinations_base3(n, values=[0, 1, 2]):
-    //     total = 3 ** n
-    //     result = []
-    //     for i in range(total):
-    //         comb = []
-    //         num = i
-    //         for _ in range(n):
-    //             comb.append(values[num % 3])
-    //             num //= 3
-    //         result.append(comb[::-1])  # reverse to get correct order
-    //     return result
-    Err("not implemented".into())
+
+    Ok(min_quantum_entaglement)
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    Err("not implemented".into())
+pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(input_path)?;
+    let mut packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
+    let boundary = packages.iter().sum::<u64>().div_euclid(4);
+    packages.sort();
+    packages.reverse();
+
+    let mut range: Vec<_> = (1..2_usize.pow(packages.len() as u32)).collect();
+    range.sort_unstable_by_key(|v| v.count_ones());
+
+    let mut max_package_count = packages.len();
+    let mut min_quantum_entaglement: u64 = packages.iter().product();
+
+    for n in range.iter_mut() {
+        let package_count = n.count_ones() as usize;
+        if package_count > max_package_count {
+            break;
+        }
+
+        let start = n.trailing_zeros() as usize;
+        let mut sum = 0;
+        let mut set = HashSet::new();
+
+        *n >>= start;
+
+        for index in start..packages.len() {
+            let bit = *n & 1 == 1;
+            if bit {
+                let p = packages[index];
+                sum += p;
+                set.insert(p);
+            }
+            *n >>= 1;
+            if *n == 0 {
+                break;
+            }
+        }
+
+        if sum == boundary {
+            max_package_count = package_count;
+            min_quantum_entaglement = min_quantum_entaglement.min(set.iter().product());
+        }
+    }
+
+    Ok(min_quantum_entaglement)
 }
