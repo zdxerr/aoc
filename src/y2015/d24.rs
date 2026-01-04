@@ -4,10 +4,6 @@ use std::path::PathBuf;
 
 /* Gosper's Hack */
 fn iter_u32_with_exactly_n_bits(n: u32) -> impl Iterator<Item = u32> {
-    // if n > 32 || n == 0 {
-    //     return std::iter::empty();
-    // }
-
     // Start with the smallest number having n bits set: 000...0111...1 (n ones)
     let mut subset = (1u64 << n) - 1;
     let limit = 1u64 << 32; // 2^32
@@ -31,25 +27,18 @@ fn iter_u32_with_exactly_n_bits(n: u32) -> impl Iterator<Item = u32> {
 
 pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(input_path)?;
-    let mut packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
+    let packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
     let boundary = packages.iter().sum::<u64>().div_euclid(3);
-    packages.sort();
-    packages.reverse();
 
     let mut max_package_count = packages.len();
     let mut min_quantum_entaglement: u64 = packages.iter().product();
 
-    for x in 1.. {
-        for mut n in iter_u32_with_exactly_n_bits(x) {
-            let package_count = n.count_ones() as usize;
-            if package_count > max_package_count {
-                break;
-            }
+    for package_count in 1..packages.len() {
+        for mut n in iter_u32_with_exactly_n_bits(package_count as u32) {
+            let mut sum = 0;
+            let mut prod = 1;
 
             let start = n.trailing_zeros() as usize;
-            let mut sum = 0;
-            let mut set = HashSet::new();
-
             n >>= start;
 
             for index in start..packages.len() {
@@ -57,7 +46,7 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                 if bit {
                     let p = packages[index];
                     sum += p;
-                    set.insert(p);
+                    prod *= p;
                 }
                 n >>= 1;
                 if n == 0 {
@@ -67,10 +56,10 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
 
             if sum == boundary {
                 max_package_count = package_count;
-                min_quantum_entaglement = min_quantum_entaglement.min(set.iter().product());
+                min_quantum_entaglement = min_quantum_entaglement.min(prod);
             }
         }
-        if x as usize >= max_package_count {
+        if package_count >= max_package_count {
             break;
         }
     }
@@ -80,25 +69,18 @@ pub fn part1(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
 
 pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(input_path)?;
-    let mut packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
+    let packages: Vec<u64> = content.lines().map(|line| line.parse()).flatten().collect();
     let boundary = packages.iter().sum::<u64>().div_euclid(4);
-    packages.sort();
-    packages.reverse();
 
     let mut max_package_count = packages.len();
     let mut min_quantum_entaglement: u64 = packages.iter().product();
 
-    for x in 1.. {
-        for mut n in iter_u32_with_exactly_n_bits(x) {
-            let package_count = n.count_ones() as usize;
-            if package_count > max_package_count {
-                break;
-            }
+    for package_count in 1..packages.len() {
+        for mut n in iter_u32_with_exactly_n_bits(package_count as u32) {
+            let mut sum = 0;
+            let mut prod = 1;
 
             let start = n.trailing_zeros() as usize;
-            let mut sum = 0;
-            let mut set = HashSet::new();
-
             n >>= start;
 
             for index in start..packages.len() {
@@ -106,7 +88,7 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
                 if bit {
                     let p = packages[index];
                     sum += p;
-                    set.insert(p);
+                    prod *= p;
                 }
                 n >>= 1;
                 if n == 0 {
@@ -116,10 +98,10 @@ pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
 
             if sum == boundary {
                 max_package_count = package_count;
-                min_quantum_entaglement = min_quantum_entaglement.min(set.iter().product());
+                min_quantum_entaglement = min_quantum_entaglement.min(prod);
             }
         }
-        if x as usize >= max_package_count {
+        if package_count >= max_package_count {
             break;
         }
     }
