@@ -104,6 +104,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(y2015, d25, "Let It Snow");
 
     run!(y2016, d01, "No Time for a Taxicab");
+    run!(y2016, d02, "Bathroom Security");
+    run!(y2016, d04, "Security Through Obscurity");
     // run!(y2023, d02, "Cube Conundrum");
 
     // run!(y2024, d01, "");
