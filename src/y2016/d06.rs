@@ -2,7 +2,9 @@ use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 
-pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+fn count_char_occurances_per_column(
+    input_path: &PathBuf,
+) -> Result<Vec<[u64; 26]>, Box<dyn std::error::Error>> {
     let reader = BufReader::new(fs::File::open(input_path)?);
     let mut column_counter: Vec<[u64; 26]> = Vec::with_capacity(8);
 
@@ -15,6 +17,11 @@ pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>>
             column_counter[index][c_index] += 1;
         }
     }
+    Ok(column_counter)
+}
+
+pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+    let column_counter = count_char_occurances_per_column(input_path)?;
     Ok(column_counter
         .iter()
         .map(|counter| {
@@ -30,18 +37,7 @@ pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>>
 }
 
 pub fn part2(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
-    let reader = BufReader::new(fs::File::open(input_path)?);
-    let mut column_counter: Vec<[u64; 26]> = Vec::with_capacity(8);
-
-    for row in reader.split(b'\n').flatten() {
-        for (index, c) in row.iter().enumerate() {
-            let c_index = (c - b'a') as usize;
-            if column_counter.len() <= index {
-                column_counter.insert(index, [0; 26]);
-            }
-            column_counter[index][c_index] += 1;
-        }
-    }
+    let column_counter = count_char_occurances_per_column(input_path)?;
     Ok(column_counter
         .iter()
         .map(|counter| {
