@@ -100,14 +100,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(y2015, d21, "RPG Simulator 20XX");
     // run!(y2015, d22, "Wizard Simulator 20XX");
     // run!(y2015, d23, "Opening the Turing Lock");
-    run!(y2015, d24, "It Hangs in the Balance");
+    // run!(y2015, d24, "It Hangs in the Balance");
     // run!(y2015, d25, "Let It Snow");
 
-    run!(y2016, d01, "No Time for a Taxicab");
-    run!(y2016, d02, "Bathroom Security");
-    run!(y2016, d03, "Squares With Three Sides");
-    run!(y2016, d04, "Security Through Obscurity");
-    // run!(y2016, d05, "");
+    // run!(y2016, d01, "No Time for a Taxicab");
+    // run!(y2016, d02, "Bathroom Security");
+    // run!(y2016, d03, "Squares With Three Sides");
+    // run!(y2016, d04, "Security Through Obscurity");
+    run!(y2016, d05, "How About a Nice Game of Chess?");
     // run!(y2016, d06, "");
     // run!(y2016, d07, "");
     // run!(y2016, d08, "");
