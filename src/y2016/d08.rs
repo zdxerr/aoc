@@ -33,6 +33,7 @@ fn next_usize<'a>(bytes: &mut std::slice::Iter<'a, u8>) -> Option<usize> {
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let reader = BufReader::new(fs::File::open(input_path)?);
     let mut display: Display = [[false; _]; _];
+    let mut cache = [false; 6];
 
     for line in reader.split(b'\n').flatten() {
         match &line[..4] {
@@ -64,12 +65,15 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                         if let (Some(x1), Some(shift)) =
                             (next_usize(line_iter), next_usize(line_iter))
                         {
-                            let column: Vec<bool> =
-                                (0..display.len()).map(|index| display[index][x1]).collect();
+                            (0..display.len()).for_each(|index| cache[index] = display[index][x1]);
+                            //     .map(|index| display[index][x1])
+                            //     .try_into()?;
+                            // let column: Vec<bool> =
+                            //     (0..display.len()).map(|index| display[index][x1]).collect();
 
                             for index in 0..display.len() {
                                 display[(index + shift).rem_euclid(display.len())][x1] =
-                                    column[index];
+                                    cache[index];
                             }
                         } else {
                             return Err(format!("invalid command {}", stringify!(line)).into());
