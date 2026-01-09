@@ -116,9 +116,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(y2016, d11, "Radioisotope Thermoelectric Generators");
     // run!(y2016, d12, "Leonardo's Monorail");
     // run!(y2016, d13, "A Maze of Twisty Little Cubicles");
-    // run!(y2016, d14, "");
-    // run!(y2016, d15, "");
-    // run!(y2016, d16, "");
+    // run!(y2016, d14, "One-Time Pad");
+    // run!(y2016, d15, "Timing is Everything");
+    // run!(y2016, d16, "Dragon Checksum");
     // run!(y2016, d17, "");
     // run!(y2016, d18, "");
     // run!(y2016, d19, "");

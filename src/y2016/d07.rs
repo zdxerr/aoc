@@ -50,8 +50,10 @@ pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             for idx in 0..address.len() - 2 {
                 if address[idx] == b'[' {
                     hypernet = true;
+                    continue;
                 } else if address[idx] == b']' {
                     hypernet = false;
+                    continue;
                 }
 
                 if address[idx] == address[idx + 2] && address[idx] != address[idx + 1] {
