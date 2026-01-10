@@ -35,47 +35,51 @@ macro_rules! rgb_print {
 }
 
 macro_rules! run {
-    ($year:ident, $day:ident, $name:literal) => {{
+    ($year:ident, $day:ident, $name:literal, $selection:expr) => {{
         let year = stringify!($year);
         let day = stringify!($day);
-        rgb_print!(
-            156,
-            207,
-            216,
+        let number = format!(
             "{}.{:02} ",
             year.strip_prefix("y").unwrap(),
-            day.strip_prefix("d").unwrap(),
+            day.strip_prefix("d").unwrap()
         );
-        rgb_print!(224, 222, 244, "{:40}", $name);
+        if let Some(selection) = &$selection
+            && !number.contains(selection)
+        {
+        } else {
+            rgb_print!(156, 207, 216, "{number}");
+            rgb_print!(224, 222, 244, "{:40}", $name);
 
-        let input_path = env::current_dir()?
-            .join("input")
-            .join(year)
-            .join(day)
-            .join("input.txt");
-        let t0 = Instant::now();
-        let result = $year::$day::part1(&input_path);
-        let duration = t0.elapsed().as_secs_f64() * 1000.0;
-        rgb_print!(144, 140, 170, "   1 ");
-        rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
-        match result {
-            Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
-            Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
+            let input_path = env::current_dir()?
+                .join("input")
+                .join(year)
+                .join(day)
+                .join("input.txt");
+            let t0 = Instant::now();
+            let result = $year::$day::part1(&input_path);
+            let duration = t0.elapsed().as_secs_f64() * 1000.0;
+            rgb_print!(144, 140, 170, "   1 ");
+            rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
+            match result {
+                Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
+                Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
+            }
+            let t0 = Instant::now();
+            let result = $year::$day::part2(&input_path);
+            let duration = t0.elapsed().as_secs_f64() * 1000.0;
+            rgb_print!(144, 140, 170, "   2 ");
+            rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
+            match result {
+                Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
+                Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
+            }
+            println!();
         }
-        let t0 = Instant::now();
-        let result = $year::$day::part2(&input_path);
-        let duration = t0.elapsed().as_secs_f64() * 1000.0;
-        rgb_print!(144, 140, 170, "   2 ");
-        rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
-        match result {
-            Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
-            Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
-        }
-        println!();
     }};
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let selection = std::env::args().nth(1);
     let t0 = Instant::now();
     // run!(y2015, d01, "Not Quite Lisp");
     // run!(y2015, d02, "I Was Told There Would Be No Math");
@@ -100,18 +104,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(y2015, d21, "RPG Simulator 20XX");
     // run!(y2015, d22, "Wizard Simulator 20XX");
     // run!(y2015, d23, "Opening the Turing Lock");
-    run!(y2015, d24, "It Hangs in the Balance");
+    run!(y2015, d24, "It Hangs in the Balance", selection);
     // run!(y2015, d25, "Let It Snow");
 
-    run!(y2016, d01, "No Time for a Taxicab");
-    run!(y2016, d02, "Bathroom Security");
-    run!(y2016, d03, "Squares With Three Sides");
-    run!(y2016, d04, "Security Through Obscurity");
+    run!(y2016, d01, "No Time for a Taxicab", selection);
+    run!(y2016, d02, "Bathroom Security", selection);
+    run!(y2016, d03, "Squares With Three Sides", selection);
+    run!(y2016, d04, "Security Through Obscurity", selection);
     // run!(y2016, d05, "");
     // run!(y2016, d06, "");
     // run!(y2016, d07, "");
     // run!(y2016, d08, "");
-    // run!(y2016, d09, "");
+    run!(y2016, d09, "", selection);
     // run!(y2016, d10, "");
     // run!(y2016, d11, "");
     // run!(y2016, d12, "");
