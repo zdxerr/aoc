@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread;
 
 fn solve(input_path: &PathBuf, mask: u32) -> Result<u64, Box<dyn std::error::Error>> {
-    let prefix = fs::read_to_string(input_path)?.trim().trim().to_string();
+    let prefix = fs::read_to_string(input_path)?.trim().to_string();
 
     let next_number = AtomicU64::new(0);
     let result = AtomicU64::new(0);
