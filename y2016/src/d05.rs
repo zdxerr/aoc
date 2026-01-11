@@ -1,9 +1,9 @@
-use crate::y2015::d04_md5::md5;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc;
 use std::thread;
+use y2015::d04_md5::md5;
 
 const MASK: u32 = 0xFFFFF000;
 

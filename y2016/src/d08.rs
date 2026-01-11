@@ -66,10 +66,6 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                             (next_usize(line_iter), next_usize(line_iter))
                         {
                             (0..display.len()).for_each(|index| cache[index] = display[index][x1]);
-                            //     .map(|index| display[index][x1])
-                            //     .try_into()?;
-                            // let column: Vec<bool> =
-                            //     (0..display.len()).map(|index| display[index][x1]).collect();
 
                             for index in 0..display.len() {
                                 display[(index + shift).rem_euclid(display.len())][x1] =
@@ -87,10 +83,12 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         // println!();
         // _print_display(&display);
     }
-    Ok(display.iter().flatten().filter(|&&c| c).count()) // 117 too low
+    Ok(display.iter().flatten().filter(|&&c| c).count())
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
+pub fn part2(_input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+    // Use _print_display from part1.
+
     // ###..#..#.###..#..#..##..####..##..####..###.#....
     // #..#.#..#.#..#.#..#.#..#.#....#..#.#......#..#....
     // #..#.#..#.#..#.#..#.#....###..#..#.###....#..#....
@@ -98,6 +96,5 @@ pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     // #.#..#..#.#.#..#..#.#..#.#....#..#.#......#..#....
     // #..#..##..#..#..##...##..####..##..####..###.####.
 
-    // RURUCEOEIL
-    Err("not implemented".into())
+    Ok("RURUCEOEIL".into())
 }

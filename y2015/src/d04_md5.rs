@@ -53,12 +53,6 @@ fn i(x: u32, y: u32, z: u32) -> u32 {
     y ^ (x | !z)
 }
 
-// utility function to convert a vector of type T with size N into an array of type T with size N.
-fn vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
-    v.try_into()
-        .unwrap_or_else(|_v: Vec<T>| panic!("error converting vector to array - sizes don't match"))
-}
-
 /**
 * Round 1 function is specified as 16 operations using the following:
 * Let [abcd, k s i] denote the operation -

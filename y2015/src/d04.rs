@@ -1,4 +1,4 @@
-use crate::y2015::d04_md5::md5;
+use crate::d04_md5::md5;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};

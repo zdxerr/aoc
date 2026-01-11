@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+y2015 = { path = "y2015" }
+y2016 = { path = "y2016" }
+
+[workspace]
+members = ["y2015", "y2016"]
+
+# [lib]
+# name = "y2015"
 
 [profile.release]
 debug = true

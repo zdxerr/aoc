@@ -1,11 +1,11 @@
-mod y2015;
-mod y2016;
-mod y2023;
-mod y2024;
-mod y2025;
+// mod y2023;
+// mod y2024;
+// mod y2025;
 
 use std::env;
 use std::time::Instant;
+use y2015;
+use y2016;
 
 // #[cfg(windows)]
 // {
@@ -123,7 +123,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2016, d24, "Air Duct Spelunking");
     run!(y2016, d25, "Clock Signal");
 
-    run!(y2023, d02, "Cube Conundrum");
+    // run!(y2023, d02, "Cube Conundrum");
 
     // run!(y2024, d01, "");
     // run!(y2024, d02, "");
@@ -151,18 +151,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run!(y2024, d24, "");
     // run!(y2024, d25, "");
 
-    run!(y2025, d01, "Secret Entrance");
-    run!(y2025, d02, "Gift Shop");
-    run!(y2025, d03, "Lobby");
-    run!(y2025, d04, "Printing Department");
-    run!(y2025, d05, "Cafeteria");
-    run!(y2025, d06, "Trash Compactor");
-    run!(y2025, d07, "Laboratories");
-    run!(y2025, d08, "Playground");
-    run!(y2025, d09, "Movie Theater");
-    run!(y2025, d10, "Factory");
-    run!(y2025, d11, "Reactor");
-    run!(y2025, d12, "Christmas Tree Farm");
+    // run!(y2025, d01, "Secret Entrance");
+    // run!(y2025, d02, "Gift Shop");
+    // run!(y2025, d03, "Lobby");
+    // run!(y2025, d04, "Printing Department");
+    // run!(y2025, d05, "Cafeteria");
+    // run!(y2025, d06, "Trash Compactor");
+    // run!(y2025, d07, "Laboratories");
+    // run!(y2025, d08, "Playground");
+    // run!(y2025, d09, "Movie Theater");
+    // run!(y2025, d10, "Factory");
+    // run!(y2025, d11, "Reactor");
+    // run!(y2025, d12, "Christmas Tree Farm");
     let duration = t0.elapsed().as_secs_f64() * 1000.0;
     rgb_print!(156, 207, 216, "Total");
     println!();
