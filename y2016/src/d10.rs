@@ -1,14 +1,21 @@
 use std::collections::VecDeque;
 use std::fs;
-use std::io::{BufReader, Read};
-use std::iter::Peekable;
+use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
+
+#[derive(Debug, Default, Clone, Copy)]
+enum Next {
+    Bot(usize),
+    Output(usize),
+    #[default]
+    None,
+}
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Bot {
     input: [Option<usize>; 2],
-    low: Option<usize>,
-    high: Option<usize>,
+    low: Next,
+    high: Next,
 }
 
 fn next_usize<'a>(
@@ -38,46 +45,74 @@ fn next_usize<'a>(
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let _content = fs::read_to_string(input_path)?;
     let reader = BufReader::new(fs::File::open(input_path)?);
-
-    let bytes = &mut reader.bytes().flatten();
+    // let bytes = &mut reader.bytes().flatten();
 
     let mut bots = [Bot::default(); 250];
 
     // bot 99 gives low to bot 97 and high to bot 43
     // bot 47 gives low to output 12 and high to bot 64
     // value 41 goes to bot 204
+    //
+    let patterns: &[&[u8]] = &[
+        b"value ? goes to bot ?",
+        b"bot ? gives low to bot ? and high to bot ?",
+        b"bot ? gives low to output 12 and high to bot ?",
+        b"bot ? gives low to bot 12 and high to output ?",
+        b"bot ? gives low to output 12 and high to output ?",
+    ];
 
-    loop {
-        match bytes.next() {
-            Some(b'b') => {
-                if let (Some(bot), Some(low), Some(high)) =
-                    (next_usize(bytes), next_usize(bytes), next_usize(bytes))
-                {
-                    bots[bot].low = Some(low);
-                    bots[bot].high = Some(high);
-                    // println!("bot {bot} {low} {high}");
-                } else {
-                    return Err("invalid bot".into());
-                }
-            }
-            Some(b'v') => {
-                if let (Some(value), Some(bot)) = (next_usize(bytes), next_usize(bytes)) {
-                    match bots[bot].input {
-                        [None, None] => bots[bot].input[0] = Some(value),
-                        [Some(value0), None] | [None, Some(value0)] => {
-                            bots[bot].input = [Some(value0.min(value)), Some(value0.max(value))]
+    for line in reader.lines().flatten() {
+        let mut splitted = line.split(' ');
+        match splitted.next() {
+            Some("value") => {
+                if let (Some(value), Some(bot)) = (
+                    splitted.next().and_then(|s| s.parse::<usize>().ok()),
+                    splitted.nth(3).and_then(|s| s.parse::<usize>().ok()),
+                ) {
+                    let input = &mut bots[bot].input;
+                    match input {
+                        [None, None] => input[0] = Some(value),
+                        [Some(value0), None] => {
+                            if *value0 < value {
+                                input[1] = Some(value);
+                            } else {
+                                input[1] = input[0];
+                                input[0] = Some(value);
+                            }
                         }
-                        [Some(_), Some(_)] => {
-                            return Err(format!("too many input value for bot {bot}").into());
+                        _ => {
+                            return Err(format!(
+                                "overrun with command: {} [{:?}]",
+                                line, bots[bot]
+                            )
+                            .into());
                         }
                     }
-                    // println!("value {bot} {value}");
                 } else {
-                    return Err("invalid bot".into());
+                    return Err(format!("unable to parse command: {line}").into());
                 }
             }
-            Some(_) => return Err("invalid command".into()),
-            None => break,
+            Some("bot") => {
+                if let Some(bot) = splitted.next().and_then(|s| s.parse::<usize>().ok()) {
+                    match (
+                        splitted.nth(3),
+                        splitted.next().and_then(|s| s.parse::<usize>().ok()),
+                    ) {
+                        (Some("bot"), Some(low)) => bots[bot].low = Next::Bot(low),
+                        (Some("output"), Some(low)) => bots[bot].low = Next::Output(low),
+                        _ => return Err(format!("unable to parse command: {line}").into()),
+                    }
+                    match (
+                        splitted.nth(3),
+                        splitted.next().and_then(|s| s.parse::<usize>().ok()),
+                    ) {
+                        (Some("bot"), Some(low)) => bots[bot].high = Next::Bot(low),
+                        (Some("output"), Some(low)) => bots[bot].high = Next::Output(low),
+                        _ => return Err(format!("unable to parse command: {line}").into()),
+                    }
+                }
+            }
+            _ => return Err(format!("invalid command: {line}").into()),
         }
     }
 
@@ -89,15 +124,16 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         .collect();
 
     while let Some(bot) = queue.pop_front() {
-        match bots[bot.low].input {
-            [None, None] => bots[bot].input[0] = Some(value),
-            [Some(value0), None] | [None, Some(value0)] => {
-                bots[bot].input = [Some(value0.min(value)), Some(value0.max(value))]
-            }
-            [Some(_), Some(_)] => {
-                return Err(format!("too many input value for bot {bot}").into());
-            }
-        }
+        println!("{bot:?}");
+        // match bots[bot.low].input {
+        //     [None, None] => bots[bot].input[0] = Some(value),
+        //     [Some(value0), None] | [None, Some(value0)] => {
+        //         bots[bot].input = [Some(value0.min(value)), Some(value0.max(value))]
+        //     }
+        //     [Some(_), Some(_)] => {
+        //         return Err(format!("too many input value for bot {bot}").into());
+        //     }
+        // }
 
         // if let [Some(value0), None] = bots[bot.low].input
     }
