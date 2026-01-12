@@ -43,23 +43,10 @@ fn next_usize<'a>(
 }
 
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
-    let _content = fs::read_to_string(input_path)?;
     let reader = BufReader::new(fs::File::open(input_path)?);
-    // let bytes = &mut reader.bytes().flatten();
 
-    let mut bots = [Bot::default(); 250];
-
-    // bot 99 gives low to bot 97 and high to bot 43
-    // bot 47 gives low to output 12 and high to bot 64
-    // value 41 goes to bot 204
-    //
-    let patterns: &[&[u8]] = &[
-        b"value ? goes to bot ?",
-        b"bot ? gives low to bot ? and high to bot ?",
-        b"bot ? gives low to output 12 and high to bot ?",
-        b"bot ? gives low to bot 12 and high to output ?",
-        b"bot ? gives low to output 12 and high to output ?",
-    ];
+    let bots = &mut [Bot::default(); 250];
+    let mut queue: VecDeque<usize> = VecDeque::with_capacity(100);
 
     for line in reader.lines().flatten() {
         let mut splitted = line.split(' ');
@@ -79,6 +66,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
                                 input[1] = input[0];
                                 input[0] = Some(value);
                             }
+                            queue.push_front(bot);
                         }
                         _ => {
                             return Err(format!(
@@ -116,36 +104,56 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         }
     }
 
-    // dbg!(bots);
-    //
-    let mut queue: VecDeque<&Bot> = bots
-        .iter()
-        .filter(|b| b.input[0].is_some() && b.input[1].is_some())
-        .collect();
-
     while let Some(bot) = queue.pop_front() {
-        println!("{bot:?}");
-        // match bots[bot.low].input {
-        //     [None, None] => bots[bot].input[0] = Some(value),
-        //     [Some(value0), None] | [None, Some(value0)] => {
-        //         bots[bot].input = [Some(value0.min(value)), Some(value0.max(value))]
-        //     }
-        //     [Some(_), Some(_)] => {
-        //         return Err(format!("too many input value for bot {bot}").into());
-        //     }
-        // }
+        // println!("{bot:?}, {:?}", bots[bot]);
 
-        // if let [Some(value0), None] = bots[bot.low].input
+        if let [Some(17), Some(61)] = bots[bot].input {
+            // println!("BOOOT FOUND!");
+            return Ok(bot);
+        }
+
+        if let (Next::Bot(low), Some(value)) = (bots[bot].low, bots[bot].input[0]) {
+            bots[bot].input[0] = None;
+            queue.push_back(low);
+            let input = &mut bots[low].input;
+            match input {
+                [None, None] => input[0] = Some(value),
+                [Some(value0), None] => {
+                    if *value0 < value {
+                        input[1] = Some(value);
+                    } else {
+                        input[1] = input[0];
+                        input[0] = Some(value);
+                    }
+                }
+                _ => {
+                    return Err(format!("overrun on bot").into());
+                }
+            }
+        }
+
+        if let (Next::Bot(high), Some(value)) = (bots[bot].high, bots[bot].input[1]) {
+            bots[bot].input[1] = None;
+            queue.push_back(high);
+            let input = &mut bots[high].input;
+            match input {
+                [None, None] => input[0] = Some(value),
+                [Some(value0), None] => {
+                    if *value0 < value {
+                        input[1] = Some(value);
+                    } else {
+                        input[1] = input[0];
+                        input[0] = Some(value);
+                    }
+                }
+                _ => {
+                    return Err(format!("overrun on bot").into());
+                }
+            }
+        }
     }
-    // let mut b = Bot {
-    //     input: [None, None],
-    //     low: 0,
-    //     high: 1,
-    // };
 
-    // b.input;
-
-    Err("not implemented".into())
+    Err("bot with input 17 and 61 not found".into())
 }
 
 pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
