@@ -18,34 +18,10 @@ struct Bot {
     high: Next,
 }
 
-fn next_usize<'a>(
-    bytes: &mut impl Iterator<Item = u8>,
-    // bytes: &mut impl Peekable<Item = u8>,
-) -> Option<usize> {
-    let mut num = None;
-    for b in bytes {
-        match (b, num) {
-            (b'0'..=b'9', None) => num = Some((b - b'0') as usize),
-            (b'0'..=b'9', Some(num0)) => {
-                num = Some(num0 * 10 + (b - b'0') as usize);
-            }
-            (_, Some(_)) => return num,
-            _ => (),
-        }
-        // if (b'0'..=b'9').contains(&b) {
-        //     let num = num.get_or_insert_default();
-        //     *num = *num * 10 + (b - b'0') as usize;
-        // } else if num.is_some() {
-        //     return num;
-        // }
-    }
-    num
-}
-
-pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+fn parse(input_path: &PathBuf, part1: bool) -> Result<usize, Box<dyn std::error::Error + 'static>> {
     let reader = BufReader::new(fs::File::open(input_path)?);
-
-    let bots = &mut [Bot::default(); 250];
+    let bots = &mut [Bot::default(); 240];
+    let outputs = &mut [None; 21];
     let mut queue: VecDeque<usize> = VecDeque::with_capacity(100);
 
     for line in reader.lines().flatten() {
@@ -105,57 +81,78 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     }
 
     while let Some(bot) = queue.pop_front() {
-        // println!("{bot:?}, {:?}", bots[bot]);
-
-        if let [Some(17), Some(61)] = bots[bot].input {
-            // println!("BOOOT FOUND!");
+        if part1 && let [Some(17), Some(61)] = bots[bot].input {
             return Ok(bot);
         }
 
-        if let (Next::Bot(low), Some(value)) = (bots[bot].low, bots[bot].input[0]) {
-            bots[bot].input[0] = None;
-            queue.push_back(low);
-            let input = &mut bots[low].input;
-            match input {
-                [None, None] => input[0] = Some(value),
-                [Some(value0), None] => {
-                    if *value0 < value {
-                        input[1] = Some(value);
-                    } else {
-                        input[1] = input[0];
-                        input[0] = Some(value);
+        match (bots[bot].low, bots[bot].input[0]) {
+            (Next::Bot(low), Some(value)) => {
+                bots[bot].input[0] = None;
+                queue.push_back(low);
+                let input = &mut bots[low].input;
+                match input {
+                    [None, None] => input[0] = Some(value),
+                    [Some(value0), None] => {
+                        if *value0 < value {
+                            input[1] = Some(value);
+                        } else {
+                            input[1] = input[0];
+                            input[0] = Some(value);
+                        }
+                    }
+                    _ => {
+                        return Err(format!("overrun on bot").into());
                     }
                 }
-                _ => {
-                    return Err(format!("overrun on bot").into());
-                }
             }
+            (Next::Output(output), Some(value)) if outputs[output].is_none() => {
+                outputs[output] = Some(value);
+            }
+            _ => (),
         }
 
-        if let (Next::Bot(high), Some(value)) = (bots[bot].high, bots[bot].input[1]) {
-            bots[bot].input[1] = None;
-            queue.push_back(high);
-            let input = &mut bots[high].input;
-            match input {
-                [None, None] => input[0] = Some(value),
-                [Some(value0), None] => {
-                    if *value0 < value {
-                        input[1] = Some(value);
-                    } else {
-                        input[1] = input[0];
-                        input[0] = Some(value);
+        match (bots[bot].high, bots[bot].input[1]) {
+            (Next::Bot(high), Some(value)) => {
+                bots[bot].input[1] = None;
+                queue.push_back(high);
+                let input = &mut bots[high].input;
+                match input {
+                    [None, None] => input[0] = Some(value),
+                    [Some(value0), None] => {
+                        if *value0 < value {
+                            input[1] = Some(value);
+                        } else {
+                            input[1] = input[0];
+                            input[0] = Some(value);
+                        }
+                    }
+                    _ => {
+                        return Err(format!("overrun on bot").into());
                     }
                 }
-                _ => {
-                    return Err(format!("overrun on bot").into());
-                }
             }
+            (Next::Output(output), Some(value)) if outputs[output].is_none() => {
+                outputs[output] = Some(value);
+            }
+            _ => (),
         }
     }
-
-    Err("bot with input 17 and 61 not found".into())
+    if part1 {
+        Err("bot with input 17 and 61 not found".into())
+    } else {
+        if let (Some(output0), Some(output1), Some(output2)) = (outputs[0], outputs[1], outputs[2])
+        {
+            Ok(output0 * output1 * output2)
+        } else {
+            Err(format!("outpus missing: {:?}", outputs).into())
+        }
+    }
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    Err("not implemented".into())
+pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    parse(input_path, true)
+}
+
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    parse(input_path, false)
 }
