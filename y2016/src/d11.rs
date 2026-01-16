@@ -50,20 +50,24 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         if !valid(&floors) {
             continue;
         }
-        // println!();
-        // for (floor_index, (generators, microchips)) in floors.iter().enumerate().rev() {
-        //     print!(
-        //         "{floor_index:01} {:1} ",
-        //         if floor_index == floor { '#' } else { ' ' }
-        //     );
-        //     for microchip in microchips {
-        //         print!("[{microchip}] ");
-        //     }
-        //     for generator in generators {
-        //         print!("{{{generator}}} ");
-        //     }
-        //     println!();
-        // }
+        if step > 2 {
+            return Err("END".into());
+        }
+        println!();
+        for (floor_index, (generators, microchips)) in floors.iter().enumerate().rev() {
+            print!(
+                "{floor_index:01} {:1} ",
+                if floor_index == floor { '#' } else { ' ' }
+            );
+            for microchip in microchips {
+                print!("[{microchip}] ");
+            }
+            for generator in generators {
+                print!("{{{generator}}} ");
+            }
+            println!();
+        }
+        println!("{step}");
 
         if floors[0..floors.len() - 1]
             .iter()
