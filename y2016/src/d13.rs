@@ -23,6 +23,7 @@ fn solve(input_path: &PathBuf, part1: bool) -> Result<usize, Box<dyn std::error:
                 return Ok(s);
             }
         } else if s > 50 {
+            // part 2
             continue;
         }
         if !visited.insert((x, y)) {

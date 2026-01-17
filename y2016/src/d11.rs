@@ -1,32 +1,64 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::PathBuf;
 
+// #[derive(Clone, Default, PartialEq, Eq, Hash)]
+// struct Floor<'a> {
+//     generators: Vec<&'a str>,
+//     microchips: Vec<&'a str>,
+// }
 type Floors<T> = Vec<(Vec<T>, Vec<T>)>;
 type State<T> = (usize, usize, Floors<T>);
 
 fn valid(floors: &Floors<&str>) -> bool {
     for (generators, microchips) in floors {
-        for microchip in microchips {
-            if !generators.is_empty() && !generators.iter().any(|generator| generator.eq(microchip))
-            {
-                return false;
+        let mut generators_active = generators.clone();
+        let mut microchips_active = microchips.clone();
+        for generator_idx in (0..generators_active.len()).rev() {
+            for microchip_idx in (0..microchips_active.len()).rev() {
+                if generators_active[generator_idx].eq(microchips_active[microchip_idx]) {
+                    generators_active.remove(generator_idx);
+                    microchips_active.remove(microchip_idx);
+                    break;
+                }
             }
         }
+        if !generators_active.is_empty() && !microchips_active.is_empty() {
+            return false;
+        }
     }
-    // for microchip in state.2[state.1].1 {
-    //     for generator in state.2[state.1].0 {
-    //         if microchip == generator {
-    //             return false;
-    //         }
-    //     }
-    // }
     true
 }
 
+fn _print_state(state: &State<&str>) {
+    println!(
+        "{:_^30}",
+        format!(
+            " {} {} ",
+            state.0,
+            if valid(&state.2) { "valid" } else { "INVALID" }
+        )
+    );
+    for (floor_index, (generators, microchips)) in state.2.iter().enumerate().rev() {
+        print!(
+            "{floor_index:01} {:1} ",
+            if floor_index == state.1 { '#' } else { ' ' }
+        );
+        for microchip in microchips {
+            print!("M[{microchip}] ");
+        }
+        for generator in generators {
+            print!("G{{{generator}}} ");
+        }
+        println!();
+    }
+}
+
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
-    // let content = fs::read_to_string(input_path)?;
-    let content = fs::read_to_string(r"input/y2016/d11/test.txt")?;
+    let content = fs::read_to_string(input_path)?;
+    // let content = fs::read_to_string(r"input/y2016/d11/test.txt")?;
+
+    // let elements = HashMap::new();
 
     let init_floors: Floors<&str> = content
         .lines()
@@ -44,50 +76,25 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         })
         .collect();
     let mut queue: VecDeque<State<&str>> = VecDeque::with_capacity(1000);
+    let mut visited: HashSet<(usize, Floors<&str>)> = HashSet::new();
     queue.push_back((0, 0, init_floors));
 
-    while let Some((step, floor, floors)) = queue.pop_front() {
-        if !valid(&floors) {
+    while let Some(state) = queue.pop_front() {
+        if !visited.insert((state.1, state.2.clone())) {
             continue;
         }
-        if step > 2 {
-            return Err("END".into());
+        // _print_state(&state);
+        if !valid(&state.2) {
+            continue;
         }
-        println!();
-        for (floor_index, (generators, microchips)) in floors.iter().enumerate().rev() {
-            print!(
-                "{floor_index:01} {:1} ",
-                if floor_index == floor { '#' } else { ' ' }
-            );
-            for microchip in microchips {
-                print!("[{microchip}] ");
-            }
-            for generator in generators {
-                print!("{{{generator}}} ");
-            }
-            println!();
-        }
-        println!("{step}");
+
+        let (step, floor, floors) = state;
 
         if floors[0..floors.len() - 1]
             .iter()
             .map(|(generators, microchips)| generators.is_empty() && microchips.is_empty())
             .all(|c| c)
         {
-            println!();
-            for (floor_index, (generators, microchips)) in floors.iter().enumerate().rev() {
-                print!(
-                    "{floor_index:01} {:1} ",
-                    if floor_index == floor { '#' } else { ' ' }
-                );
-                for microchip in microchips {
-                    print!("[{microchip}] ");
-                }
-                for generator in generators {
-                    print!("{{{generator}}} ");
-                }
-                println!();
-            }
             return Ok(step);
         }
         let microchips_len = floors[floor].1.len();
@@ -95,19 +102,15 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
             let next_floor = floor + 1;
             if (0..floors.len()).contains(&next_floor) {
                 let mut next_floors = floors.clone();
-                // dbg!(&next_floors);
-                // println!("{:?}", next_floors[floor].0);
                 let microchip0 = next_floors[floor].1.remove(microchip_index0);
                 next_floors[next_floor].1.push(microchip0);
 
-                if let Some(generator_index) =
-                    next_floors[floor].0.iter().position(|s| s == &microchip0)
+                if let Some(generator_index) = floors[floor].0.iter().position(|s| s == &microchip0)
                 {
                     let generator = next_floors[floor].0.remove(generator_index);
                     next_floors[next_floor].0.push(generator);
+                    queue.push_back((step + 1, next_floor, next_floors));
                 }
-
-                queue.push_back((step + 1, next_floor, next_floors));
 
                 for microchip_index1 in microchip_index0 + 1..microchips_len {
                     let mut next_floors = floors.clone();
@@ -129,9 +132,7 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         }
     }
 
-    println!();
-
-    Err("not implemented".into())
+    Err("not soultion found".into())
 }
 
 pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
