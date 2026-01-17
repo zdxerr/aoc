@@ -14,37 +14,26 @@ fn valid(floors: &Vec<u16>) -> bool {
     true
 }
 
-// fn _print_state(state: &State<&str>) {
-//     println!(
-//         "{:_^30}",
-//         format!(
-//             " {} {} ",
-//             state.0,
-//             if valid(&state.2) { "valid" } else { "INVALID" }
-//         )
-//     );
-//     for (floor_index, (generators, microchips)) in state.2.iter().enumerate().rev() {
-//         print!(
-//             "{floor_index:01} {:1} ",
-//             if floor_index == state.1 { '#' } else { ' ' }
-//         );
-//         for microchip in microchips {
-//             print!("M[{microchip}] ");
-//         }
-//         for generator in generators {
-//             print!("G{{{generator}}} ");
-//         }
-//         println!();
-//     }
-// }
+fn _print_state(step: usize, floor: usize, floors: Vec<u16>) {
+    println!("##### {step} {floor}");
+    for (index, f) in floors.iter().enumerate().rev() {
+        println!(
+            "{index} {} {f:016b}",
+            if floor == index { '#' } else { ' ' }
+        );
+    }
+}
 
-pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+pub fn solve(
+    input_path: &PathBuf,
+    added_elements: &[&str],
+) -> Result<usize, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(input_path)?;
     // let content = fs::read_to_string(r"input/y2016/d11/test.txt")?;
 
     let mut elements = HashMap::new();
 
-    let init_floors: Vec<u16> = content
+    let mut init_floors: Vec<u16> = content
         .lines()
         .map(|line| {
             let splitted: Vec<&str> = line.split_whitespace().collect();
@@ -68,6 +57,12 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         })
         .collect();
 
+    for element in added_elements {
+        let len = elements.len();
+        let element = elements.entry(element).or_insert_with(|| 1 << len);
+        init_floors[0] |= *element << 8;
+    }
+
     // println!();
     // for (key, value) in &elements {
     //     println!("{} .. {:016b}", key, value);
@@ -82,17 +77,6 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
 
     queue.push_back((0, 0, init_floors));
     while let Some((step, floor, floors)) = queue.pop_front() {
-        // println!("##### {step} {floor}");
-        // for (index, f) in floors.iter().enumerate().rev() {
-        //     println!(
-        //         "{index} {} {f:016b}",
-        //         if floor == index { '#' } else { ' ' }
-        //     );
-        // }
-        // println!();
-        // if step > 3 {
-        //     continue;
-        // }
         if !visited.insert((floor, floors.clone())) {
             continue;
         }
@@ -147,17 +131,10 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     Err("not soultion found".into())
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    // You step into the cleanroom separating the lobby from the isolated area and put on the hazmat suit.
+pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    solve(input_path, &[])
+}
 
-    // Upon entering the isolated containment area, however, you notice some extra parts on the first floor that weren't listed on the record outside:
-
-    // An elerium generator.
-    // An elerium-compatible microchip.
-    // A dilithium generator.
-    // A dilithium-compatible microchip.
-    // These work just like the other generators and microchips. You'll have to get them up to assembly as well.
-
-    // What is the minimum number of steps required to bring all of the objects, including these four new ones, to the fourth floor?
-    Err("not implemented".into())
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    solve(input_path, &["elerium", "dilithium"])
 }
