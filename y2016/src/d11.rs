@@ -146,9 +146,6 @@ pub fn solve(
     let mut visited = HashSet::with_capacity_and_hasher(8192, FastU64BuildHasher);
     queue.push_back((0, init_floors));
     while let Some((step, floors)) = queue.pop_front() {
-        if !valid(floors) {
-            continue;
-        }
         if visited.contains(&floors) {
             continue;
         }
@@ -182,14 +179,18 @@ pub fn solve(
                     let mut next_floors = next_floors;
                     next_floors ^= microchip1 << (current_floor * 2 * ELEMENTS + ELEMENTS);
                     next_floors ^= microchip1 << (next_floor * 2 * ELEMENTS + ELEMENTS);
-                    queue.push_back((step + 1, next_floors));
+                    if valid(next_floors) {
+                        queue.push_back((step + 1, next_floors));
+                    }
                 }
 
                 if generators(next_floors, current_floor) & microchip0 > 0 {
                     next_floors ^= microchip0 << (current_floor * 2 * ELEMENTS);
                     next_floors ^= microchip0 << (next_floor * 2 * ELEMENTS);
                 }
-                queue.push_back((step + 1, next_floors));
+                if valid(next_floors) {
+                    queue.push_back((step + 1, next_floors));
+                }
             }
 
             let next_floor = current_floor + 1;
@@ -198,7 +199,9 @@ pub fn solve(
                     (floors & !(0b11 << (ELEMENTS * 8))) | (next_floor << (ELEMENTS * 8));
                 next_floors ^= microchip0 << (current_floor * 2 * ELEMENTS + ELEMENTS);
                 next_floors ^= microchip0 << (next_floor * 2 * ELEMENTS + ELEMENTS);
-                queue.push_back((step + 1, next_floors));
+                if valid(next_floors) {
+                    queue.push_back((step + 1, next_floors));
+                }
             }
         }
     }
