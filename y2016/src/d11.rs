@@ -2,6 +2,8 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::PathBuf;
 
+const ELEMENTS: u64 = 7;
+
 // fn valid(floors: &Vec<u16>) -> bool {
 //     for floor in floors {
 //         let generators = floor & 0xFF;
@@ -13,11 +15,27 @@ use std::path::PathBuf;
 //     }
 //     true
 // }
+//
+
+#[inline]
+fn current_index(floors: u64) -> u64 {
+    floors >> (ELEMENTS * 8)
+}
+
+#[inline]
+fn generators(floors: u64, index: u64) -> u64 {
+    (floors >> (index * ELEMENTS * 2)) & ((1 << ELEMENTS) - 1)
+}
+
+#[inline]
+fn microchips(floors: u64, index: u64) -> u64 {
+    (floors >> (index * ELEMENTS * 2 + ELEMENTS)) & ((1 << ELEMENTS) - 1)
+}
 
 fn valid(floors: u64) -> bool {
     for floor in 0..4 {
-        let generators = floors >> (floor * 12) & 0b111111;
-        let microchips = floors >> (floor * 12 + 6) & 0b111111;
+        let generators = generators(floors, floor);
+        let microchips = microchips(floors, floor);
         let difference = generators ^ microchips;
         if difference > 0 && microchips & difference > 0 && generators & difference > 0 {
             return false;
@@ -37,14 +55,17 @@ fn _print_state(step: usize, floor: usize, floors: Vec<u16>) {
 }
 
 fn _print_state2(floors: u64) {
-    let floor = (floors & (0b11 << 62)) >> 62;
-    println!("f {floor}");
-    for index in (0..4).rev() {
+    let current_index = current_index(floors);
+    let valid = valid(floors);
+    // println!("f {floor}");
+    for index in 0..4 {
         println!(
-            "{} {} {:012b}",
+            "{} {}  {:07b}  {:07b} {}",
             index,
-            if floor == index { '#' } else { ' ' },
-            (floors >> ((3 - index) * 12)) & 0b111111111111
+            if current_index == index { '#' } else { ' ' },
+            generators(floors, index),
+            microchips(floors, index),
+            if valid { ' ' } else { 'X' },
         )
     }
 }
@@ -57,10 +78,10 @@ pub fn solve(
     // let content = fs::read_to_string(r"input/y2016/d11/test.txt")?;
 
     let mut elements = HashMap::new();
-    // since we got 4 floors and 6 elements we can store the full state in an u64
-    let mut init_floors: u64 = content.lines().fold(0, |floors, line| {
+    // since we got 4 floors and maximally 7 elements we can store the full state in an u64
+    let mut init_floors: u64 = content.lines().fold(0_u64, |floors, line| {
         let splitted: Vec<&str> = line.split_whitespace().collect();
-        (floors << 12)
+        floors << (ELEMENTS * 2)
             | splitted.windows(2).fold(0, |floor, words| {
                 match *&words[1].trim_end_matches(['.', ',']) {
                     "generator" => {
@@ -73,22 +94,28 @@ pub fn solve(
                         let element = elements
                             .entry(words[0].trim_end_matches("-compatible"))
                             .or_insert_with(|| 1 << len);
-                        floor | *element << 6
+                        floor | *element << ELEMENTS
                     }
                     _ => floor,
                 }
             })
-    });
+    }) | (3 << (ELEMENTS * 8));
 
     for element in added_elements {
         let len = elements.len();
         let element = elements.entry(element).or_insert_with(|| 1 << len);
-        init_floors |= *element << 36;
+        init_floors |= (*element | (*element << ELEMENTS)) << (ELEMENTS * 6);
     }
     println!();
 
     println!("  {init_floors:064b}");
 
+    println!(
+        "==> {:0b}  {{{:0b}}}  ({:0b})",
+        (init_floors >> (3 * ELEMENTS * 2)) & ((1 << ELEMENTS) - 1),
+        (init_floors >> (3 * ELEMENTS * 2)),
+        (1 << ELEMENTS) - 1
+    );
     // for index in 0..4 {
     //     println!(
     //         "{index} _{:012b}",
