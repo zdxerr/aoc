@@ -23,26 +23,38 @@ fn parse_u32(
         .collect())
 }
 
-pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+pub fn part1(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
     // let _content = fs::read_to_string(input_path)?;
 
     let mut discs = parse_u32(input_path)?;
     discs.sort_by_key(|a| a.1);
     discs.reverse();
-    println!();
-    println!(" {:?}", discs);
+    // println!();
+    // println!(" {:?}", discs);
 
-    let first = discs[0];
+    // for disc in &discs {
+    //     let start = disc.1 - (disc.0 + disc.3).rem_euclid(disc.1);
+    //     let range: Vec<u32> = (0..5).map(|n| start + n * disc.1).collect();
+    //     println!("{disc:?}  {range:?}");
+    // }
 
-    let start = (first.0 + first.3) % first.1;
+    let disc = discs[0];
+    let start = disc.1 - (disc.0 + disc.3).rem_euclid(disc.1);
 
-    for idx in (start..1000).step_by(first.1 as usize) {
-        println!("- {idx}");
+    't: for t0 in (start..).step_by(disc.1 as usize) {
+        for disc in &discs[1..] {
+            let start = disc.1 - (disc.0 + disc.3).rem_euclid(disc.1);
+            if (t0 - start).rem_euclid(disc.1) != 0 {
+                continue 't;
+            }
+        }
+        return Ok(t0);
     }
 
     // disc / positions / time / position
-
-    Err("not implemented".into())
+    // 166 too low
+    // 292158 too high
+    Err("no solution found".into())
 }
 
 pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
