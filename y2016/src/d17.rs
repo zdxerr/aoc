@@ -3,27 +3,25 @@ use std::fs;
 use std::path::PathBuf;
 use y2015::d04_md5::md5;
 
-pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+pub fn bfs(input_path: &PathBuf, find_min: bool) -> Result<String, Box<dyn std::error::Error>> {
     let passcode = fs::read_to_string(input_path)?.trim().to_owned();
-
-    // BFS
-    let goal = (3, 3);
 
     let mut queue: VecDeque<((usize, usize), String)> = VecDeque::with_capacity(100);
     queue.push_back(((0, 0), "".to_string()));
+    let mut max_path = "".to_string();
 
     while let Some((pos, path)) = queue.pop_front() {
         let (worda, _, _, _) = md5(&format!("{passcode}{path}"));
-        // println!(
-        //     "{pos:?} {path:20} {worda:08x} {} {} {} {}",
-        //     worda >> 28 > 10,
-        //     ((worda >> 24) & 0xF) > 10,
-        //     ((worda >> 20) & 0xF) > 10,
-        //     ((worda >> 16) & 0xF) > 10
-        // );
 
-        if pos == goal {
-            return Ok(path);
+        if pos == (3, 3) {
+            if find_min {
+                return Ok(path);
+            } else {
+                if path.len() > max_path.len() {
+                    max_path = path;
+                }
+                continue;
+            }
         }
 
         if pos.1 > 0 && worda >> 28 > 10 {
@@ -47,10 +45,17 @@ pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>>
             queue.push_back(((pos.0 + 1, pos.1), path));
         }
     }
-
-    Err("no solution found".into())
+    if find_min {
+        Err("no solution found".into())
+    } else {
+        Ok(max_path)
+    }
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    Err("not implemented".into())
+pub fn part1(input_path: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+    bfs(input_path, true)
+}
+
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    bfs(input_path, false).and_then(|path| Ok(path.len()))
 }

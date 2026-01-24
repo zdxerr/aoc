@@ -332,7 +332,10 @@ fn bit_padding(input: &str) -> Vec<u8> {
     input
         .bytes()
         .chain([128])
-        .chain(std::iter::repeat(0).take((448 - ((bit_length + 8) % 512)) / 8))
+        .chain(
+            std::iter::repeat(0)
+                .take(((bit_length + 8 + 64).next_multiple_of(512) - (bit_length + 8 + 64)) / 8),
+        )
         .chain(bit_length.to_le_bytes())
         .collect()
 }
