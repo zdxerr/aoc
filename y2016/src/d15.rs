@@ -23,20 +23,21 @@ fn parse_u32(
         .collect())
 }
 
-pub fn part1(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
-    // let _content = fs::read_to_string(input_path)?;
-
+pub fn solve(
+    input_path: &PathBuf,
+    additional_discs: &[(u32, u32, u32)],
+) -> Result<u32, Box<dyn std::error::Error>> {
     let mut discs = parse_u32(input_path)?;
+    for additional_disc in additional_discs {
+        discs.push((
+            discs.len() as u32 + 1,
+            additional_disc.0,
+            additional_disc.1,
+            additional_disc.2,
+        ));
+    }
     discs.sort_by_key(|a| a.1);
     discs.reverse();
-    // println!();
-    // println!(" {:?}", discs);
-
-    // for disc in &discs {
-    //     let start = disc.1 - (disc.0 + disc.3).rem_euclid(disc.1);
-    //     let range: Vec<u32> = (0..5).map(|n| start + n * disc.1).collect();
-    //     println!("{disc:?}  {range:?}");
-    // }
 
     let disc = discs[0];
     let start = disc.1 - (disc.0 + disc.3).rem_euclid(disc.1);
@@ -57,6 +58,10 @@ pub fn part1(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
     Err("no solution found".into())
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    Err("not implemented".into())
+pub fn part1(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
+    solve(input_path, &[])
+}
+
+pub fn part2(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
+    solve(input_path, &[(11, 0, 0)])
 }
