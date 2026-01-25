@@ -1,74 +1,141 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::{PathBuf, StripPrefixError};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::mpsc;
-use std::thread;
+use std::path::PathBuf;
 use y2015::d04_md5::md5;
 
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
     let prefix = fs::read_to_string(input_path)?.trim().to_string();
     let prefix = "abc";
 
-    let mut key = String::with_capacity(20);
-    key.push_str(prefix);
-    let prefix_len = prefix.len();
-    let mut triples: HashMap<u8, Vec<usize>> = HashMap::with_capacity(16);
+    let mut triples: Vec<(usize, u8)> = Vec::with_capacity(10000);
+    let mut quintuples: HashMap<u8, Vec<usize>> = HashMap::with_capacity(100);
     let mut keys = HashSet::with_capacity(64);
-    println!();
+    println!("{prefix}");
 
-    for number in 0_usize.. {
-        // for number in 0..=30 {
-        key.replace_range(prefix_len.., &number.to_string());
-        let (worda, wordb, wordc, wordd) = md5(&key);
-        let hash = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
+    fn scan(
+        prefix: &str,
+        triples: &mut Vec<(usize, u8)>,
+        quintuples: &mut HashMap<u8, Vec<usize>>,
+        range: impl IntoIterator<Item = usize>,
+    ) {
+        let mut key = String::with_capacity(20);
+        key.push_str(prefix);
+        let prefix_len = prefix.len();
 
-        // println!("{key} {hash}");
+        for number in range {
+            key.replace_range(prefix_len.., &number.to_string());
+            let (worda, wordb, wordc, wordd) = md5(&key);
+            let hash = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
 
-        let b = hash.as_bytes();
-        // let mut q = false;
-        for idx in 0..b.len() - 7 {
-            let c = b[idx];
-            if b[idx + 1] == c && b[idx + 2] == c {
-                let ctriples = triples.entry(c).or_default();
+            // if [92, 200].contains(&number) {
+            //     println!("{number} {hash}");
+            // }
 
-                if b[idx + 3] == c && b[idx + 4] == c {
-                    println!("QUINTUPLE {} {number} ({})", c as char, hash);
-                    println!("-> {ctriples:?}");
-                    // let p = ctriples.partition_point(|&tnumber| tnumber > number - 1000);
-                    // let r = ..p.max(1);
-                    // println!("{p}, {r:?}, {:?}", &ctriples[p..]);
-                    for tnumber in ctriples
-                        .drain(..)
-                        .rev()
-                        .take_while(|&tnumber| tnumber >= number.saturating_sub(1000))
-                    {
-                        println!("{tnumber} .. {}", keys.len());
-                        keys.insert(tnumber);
-                        if keys.len() >= 64 {
-                            return Ok(*keys.iter().max().unwrap());
-                        }
-                    }
-
-                    // for tnumber in ctriples
-                    //     .iter()
-                    //     .rev()
-                    //     .take_while(|&&tnumber| tnumber > number - 1000)
+            let b = hash.as_bytes();
+            for idx in 0..b.len() - 3 {
+                let c = b[idx];
+                if b[idx + 1] == c && b[idx + 2] == c {
+                    // if let Some((last_number, last_c)) = triples.last()
+                    //     && *last_number == number
+                    //     && *last_c == c
                     // {
-                    //     keys.insert(tnumber);
+                    // } else {
+                    // triples.push((number, c));
                     // }
-                    // quintuples.push(number);
-                    // q = true;
-                    // break;
-                }
-                match ctriples.last() {
-                    Some(&last_number) if last_number != number => ctriples.push(number),
-                    None => ctriples.push(number),
-                    _ => (),
+                    if idx + 4 < b.len() && b[idx + 3] == c && b[idx + 4] == c {
+                        // triples.pop();
+                        let cquintuples = quintuples.entry(c).or_default();
+                        cquintuples.push(number);
+                        break;
+                    } else {
+                        triples.push((number, c));
+                    }
                 }
             }
         }
     }
+
+    // while keys.len() < 64 {
+    // t
+    scan(&prefix, &mut triples, &mut quintuples, 0..60_000);
+    dbg!(&quintuples);
+
+    for (number, c) in triples {
+        if let Some(cquintuples) = quintuples.get(&c) {
+            for quintuple_number in cquintuples {
+                if number < *quintuple_number && *quintuple_number < number + 1000 {
+                    keys.insert(number);
+
+                    println!(
+                        "FOUND #{} {number} ({quintuple_number}) [{}]",
+                        keys.len(),
+                        number == *quintuple_number
+                    );
+                    if keys.len() >= 64 {
+                        return Ok(number);
+                    }
+                } else if number > *quintuple_number {
+                    break;
+                }
+            }
+        }
+    }
+
+    // 49309 too high
+    // }
+
+    // for number in 0_usize.. {
+    //     // for number in 0..=30 {
+    //     key.replace_range(prefix_len.., &number.to_string());
+    //     let (worda, wordb, wordc, wordd) = md5(&key);
+    //     let hash = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
+
+    //     // println!("{key} {hash}");
+
+    //     let b = hash.as_bytes();
+    //     // let mut q = false;
+    //     for idx in 0..b.len() - 7 {
+    //         let c = b[idx];
+    //         if b[idx + 1] == c && b[idx + 2] == c {
+    //             let ctriples = triples.entry(c).or_default();
+
+    //             if b[idx + 3] == c && b[idx + 4] == c {
+    //                 println!("QUINTUPLE {} {number} ({})", c as char, hash);
+    //                 println!("-> {ctriples:?}");
+    //                 // let p = ctriples.partition_point(|&tnumber| tnumber > number - 1000);
+    //                 // let r = ..p.max(1);
+    //                 // println!("{p}, {r:?}, {:?}", &ctriples[p..]);
+    //                 for tnumber in ctriples
+    //                     .drain(..)
+    //                     .rev()
+    //                     .take_while(|&tnumber| tnumber >= number.saturating_sub(1000))
+    //                 {
+    //                     println!("{tnumber} .. {}", keys.len());
+    //                     keys.insert(tnumber);
+    //                     if keys.len() >= 64 {
+    //                         return Ok(*keys.iter().max().unwrap());
+    //                     }
+    //                 }
+
+    //                 // for tnumber in ctriples
+    //                 //     .iter()
+    //                 //     .rev()
+    //                 //     .take_while(|&&tnumber| tnumber > number - 1000)
+    //                 // {
+    //                 //     keys.insert(tnumber);
+    //                 // }
+    //                 // quintuples.push(number);
+    //                 // q = true;
+    //                 // break;
+    //             }
+    //             match ctriples.last() {
+    //                 Some(&last_number) if last_number != number => ctriples.push(number),
+    //                 None => ctriples.push(number),
+    //                 _ => (),
+    //             }
+    //         }
+    //     }
+    // }
     // dbg!(&triples);
     //     if q {
     //         let relevant_triples = if triples[0] > number - 1000 {
