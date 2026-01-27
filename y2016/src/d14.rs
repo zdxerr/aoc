@@ -1,218 +1,98 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 use y2015::d04_md5::md5;
 
-pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
-    let prefix = fs::read_to_string(input_path)?.trim().to_string();
-    let prefix = "abc";
+const HEX: [u8; 16] = *b"0123456789abcdef";
 
-    let mut triples: Vec<(usize, u8)> = Vec::with_capacity(10000);
-    let mut quintuples: HashMap<u8, Vec<usize>> = HashMap::with_capacity(100);
-    let mut keys = HashSet::with_capacity(64);
-    println!("{prefix}");
-
-    fn scan(
-        prefix: &str,
-        triples: &mut Vec<(usize, u8)>,
-        quintuples: &mut HashMap<u8, Vec<usize>>,
-        range: impl IntoIterator<Item = usize>,
-    ) {
-        let mut key = String::with_capacity(20);
-        key.push_str(prefix);
-        let prefix_len = prefix.len();
-
-        for number in range {
-            key.replace_range(prefix_len.., &number.to_string());
-            let (worda, wordb, wordc, wordd) = md5(&key);
-            let hash = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
-
-            // if [92, 200].contains(&number) {
-            //     println!("{number} {hash}");
-            // }
-
-            let b = hash.as_bytes();
-            for idx in 0..b.len() - 3 {
-                let c = b[idx];
-                if b[idx + 1] == c && b[idx + 2] == c {
-                    // if let Some((last_number, last_c)) = triples.last()
-                    //     && *last_number == number
-                    //     && *last_c == c
-                    // {
-                    // } else {
-                    // triples.push((number, c));
-                    // }
-                    if idx + 4 < b.len() && b[idx + 3] == c && b[idx + 4] == c {
-                        // triples.pop();
-                        let cquintuples = quintuples.entry(c).or_default();
-                        cquintuples.push(number);
-                        break;
-                    } else {
-                        triples.push((number, c));
-                    }
-                }
-            }
-        }
-    }
-
-    // while keys.len() < 64 {
-    // t
-    scan(&prefix, &mut triples, &mut quintuples, 0..60_000);
-    dbg!(&quintuples);
-
-    for (number, c) in triples {
-        if let Some(cquintuples) = quintuples.get(&c) {
-            for quintuple_number in cquintuples {
-                if number < *quintuple_number && *quintuple_number < number + 1000 {
-                    keys.insert(number);
-
-                    println!(
-                        "FOUND #{} {number} ({quintuple_number}) [{}]",
-                        keys.len(),
-                        number == *quintuple_number
-                    );
-                    if keys.len() >= 64 {
-                        return Ok(number);
-                    }
-                } else if number > *quintuple_number {
-                    break;
-                }
-            }
-        }
-    }
-
-    // 49309 too high
-    // }
-
-    // for number in 0_usize.. {
-    //     // for number in 0..=30 {
-    //     key.replace_range(prefix_len.., &number.to_string());
-    //     let (worda, wordb, wordc, wordd) = md5(&key);
-    //     let hash = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
-
-    //     // println!("{key} {hash}");
-
-    //     let b = hash.as_bytes();
-    //     // let mut q = false;
-    //     for idx in 0..b.len() - 7 {
-    //         let c = b[idx];
-    //         if b[idx + 1] == c && b[idx + 2] == c {
-    //             let ctriples = triples.entry(c).or_default();
-
-    //             if b[idx + 3] == c && b[idx + 4] == c {
-    //                 println!("QUINTUPLE {} {number} ({})", c as char, hash);
-    //                 println!("-> {ctriples:?}");
-    //                 // let p = ctriples.partition_point(|&tnumber| tnumber > number - 1000);
-    //                 // let r = ..p.max(1);
-    //                 // println!("{p}, {r:?}, {:?}", &ctriples[p..]);
-    //                 for tnumber in ctriples
-    //                     .drain(..)
-    //                     .rev()
-    //                     .take_while(|&tnumber| tnumber >= number.saturating_sub(1000))
-    //                 {
-    //                     println!("{tnumber} .. {}", keys.len());
-    //                     keys.insert(tnumber);
-    //                     if keys.len() >= 64 {
-    //                         return Ok(*keys.iter().max().unwrap());
-    //                     }
-    //                 }
-
-    //                 // for tnumber in ctriples
-    //                 //     .iter()
-    //                 //     .rev()
-    //                 //     .take_while(|&&tnumber| tnumber > number - 1000)
-    //                 // {
-    //                 //     keys.insert(tnumber);
-    //                 // }
-    //                 // quintuples.push(number);
-    //                 // q = true;
-    //                 // break;
-    //             }
-    //             match ctriples.last() {
-    //                 Some(&last_number) if last_number != number => ctriples.push(number),
-    //                 None => ctriples.push(number),
-    //                 _ => (),
-    //             }
-    //         }
-    //     }
-    // }
-    // dbg!(&triples);
-    //     if q {
-    //         let relevant_triples = if triples[0] > number - 1000 {
-    //             let p = triples.partition_point(|&tnumber| tnumber < number - 1000);
-    //             &triples[p..]
-    //         } else {
-    //             &triples[..]
-    //         };
-    //         // let p = triples.partition_point(|&tnumber| tnumber < number - 1000);
-    //         // println!("{number} {p:?}, {}", triples.len());
-    //         // println!("{triples:?}");
-    //         // let triples = triples.split_off(p);
-    //         println!("{number} {relevant_triples:?}");
-    //         for triple_idx in relevant_triples {
-    //             valid_indices.insert(triple_idx.clone());
-    //             if valid_indices.len() >= 64 {
-    //                 return Ok(*triple_idx);
-    //             }
-    //         }
-
-    //         triples.clear();
-    //         // for triple_idx in triples
-    //         //     .iter()
-    //         //     .rev()
-    //         //     .take_while(|&&triple_idx| triple_idx > idx - 1000)
-    //         // {
-    //         //     valid_indices.insert(triple_idx);
-    //         //     if valid_indices.len() >= 64 {
-    //         //         return Ok(*triple_idx);
-    //         //     }
-    //         // }
-    //     }
-    // }
-
-    // dbg!(triples.len(), quintuples.len());
-
-    // let next_number = AtomicU64::new(0);
-    // let num_workers = thread::available_parallelism()?.get();
-    // let mut password: u32 = 0;
-    // let found = AtomicBool::new(false);
-
-    // thread::scope(|s| {
-    //     let (tx, rx): (mpsc::Sender<u32>, mpsc::Receiver<u32>) = mpsc::channel();
-    //     let next_number = &next_number;
-    //     let prefix = &prefix;
-    //     for _ in 0..num_workers {
-    //         let tx = tx.clone();
-    //         let found = &found;
-    //         s.spawn(move || {
-    //             let mut key = String::with_capacity(20);
-    //             key.push_str(prefix);
-    //             let prefix_len = prefix.len();
-    //             loop {
-    //                 if found.load(Ordering::Relaxed) {
-    //                     break;
-    //                 }
-    //                 let number = next_number.fetch_add(1, Ordering::Relaxed).to_string();
-    //                 key.replace_range(prefix_len.., &number);
-    //                 let (word, _, _, _) = md5(&key);
-    //                 if word & MASK == 0 {
-    //                     if let Err(_) = tx.send((word & 0x00000F00) >> 8) {
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         });
-    //     }
-    //     drop(tx);
-    //     for code in rx.iter().take(8) {
-    //         password = password << 4 | code;
-    //     }
-    //     found.store(true, Ordering::Relaxed);
-    // });
-    // Ok(format!("{password:x}"))
-    Err("not implemented".into())
+#[inline(always)]
+fn u32_to_hex(n: u32, buf: &mut [u8]) {
+    let bytes = n.to_be_bytes();
+    // unrolled  helps some compilers avoid loop overhead
+    buf[0] = HEX[(bytes[0] >> 4) as usize];
+    buf[1] = HEX[(bytes[0] & 0x0f) as usize];
+    buf[2] = HEX[(bytes[1] >> 4) as usize];
+    buf[3] = HEX[(bytes[1] & 0x0f) as usize];
+    buf[4] = HEX[(bytes[2] >> 4) as usize];
+    buf[5] = HEX[(bytes[2] & 0x0f) as usize];
+    buf[6] = HEX[(bytes[3] >> 4) as usize];
+    buf[7] = HEX[(bytes[3] & 0x0f) as usize];
+    // unsafe { std::str::from_utf8_unchecked(buf) }
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    Err("not implemented".into())
+#[inline(always)]
+fn md5_to_hex(words: &(u32, u32, u32, u32), buffer: &mut [u8; 32]) {
+    u32_to_hex(words.0, &mut buffer[0..8]);
+    u32_to_hex(words.1, &mut buffer[8..16]);
+    u32_to_hex(words.2, &mut buffer[16..24]);
+    u32_to_hex(words.3, &mut buffer[24..]);
+}
+
+pub fn find_key(input_path: &PathBuf, stretch: bool) -> Result<usize, Box<dyn std::error::Error>> {
+    let prefix = fs::read_to_string(input_path)?.trim().to_string();
+    // let prefix = "abc";
+
+    let mut triples: Vec<(usize, u8)> = Vec::with_capacity(10000);
+    let mut keys = HashSet::with_capacity(64);
+    let mut max_key = 0;
+
+    let mut number = 0;
+
+    let mut hex = [0u8; 32];
+
+    while keys.len() < 64 || number < max_key + 1000 {
+        let key = format!("{prefix}{number}");
+        let (worda, wordb, wordc, wordd) = md5(&key);
+
+        let mut hex = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}");
+
+        // md5_to_hex(md5(&key), hex);
+
+        if stretch {
+            for _ in 0..2016 {
+                let (worda, wordb, wordc, wordd) = md5(&hex);
+                hex = format!("{worda:08x}{wordb:08x}{wordc:08x}{wordd:08x}")
+            }
+        }
+
+        let bytes = hex.as_bytes();
+        let mut found_triple = false;
+        for idx in 0..bytes.len() - 2 {
+            let c = bytes[idx];
+            if bytes[idx + 1] == c && bytes[idx + 2] == c {
+                if idx + 4 < bytes.len() && bytes[idx + 3] == c && bytes[idx + 4] == c {
+                    for triple in &triples {
+                        if triple.1 == c && triple.0 < number && number <= triple.0 + 1000 {
+                            keys.insert(triple.0);
+                            max_key = max_key.max(triple.0);
+                        }
+                    }
+                }
+                if !found_triple {
+                    triples.push((number, c));
+                    found_triple = true;
+                }
+            }
+        }
+        number += 1;
+    }
+
+    let mut keys: Vec<_> = keys.into_iter().collect();
+    keys.sort_unstable();
+
+    // for (n, k) in keys.iter().enumerate() {
+    //     println!("{n:06} {k}");
+    // }
+    if let Some(key) = keys.get(63) {
+        Ok(*key)
+    } else {
+        Err("key not forund".into())
+    }
+}
+
+pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    find_key(input_path, false)
+}
+pub fn part2(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
+    find_key(input_path, true)
 }
