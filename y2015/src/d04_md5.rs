@@ -340,6 +340,21 @@ fn bit_padding(input: &str) -> Vec<u8> {
         .collect()
 }
 
+#[inline]
+fn bit_padding_from_bytes(input: &[u8]) -> Vec<u8> {
+    let bit_length = input.len() * 8;
+    input
+        .iter()
+        .copied()
+        .chain([128])
+        .chain(
+            std::iter::repeat(0)
+                .take(((bit_length + 8 + 64).next_multiple_of(512) - (bit_length + 8 + 64)) / 8),
+        )
+        .chain(bit_length.to_le_bytes())
+        .collect()
+}
+
 /**
 * A Basic Overview of this MD5 Implementation:
 * 1. Take in a command line string and convert into
@@ -360,4 +375,33 @@ fn bit_padding(input: &str) -> Vec<u8> {
 pub fn md5(input: &str) -> (u32, u32, u32, u32) {
     let input_vec = bit_padding(input);
     return compute_md5_digest(input_vec);
+}
+
+pub fn md5_from_bytes(input: &[u8]) -> (u32, u32, u32, u32) {
+    let input_vec = bit_padding_from_bytes(input);
+    return compute_md5_digest(input_vec);
+}
+
+const HEX: [u8; 16] = *b"0123456789abcdef";
+
+#[inline(always)]
+pub fn u32_to_hex(n: u32, buf: &mut [u8]) {
+    let bytes = n.to_be_bytes();
+    // unrolled  helps some compilers avoid loop overhead
+    buf[0] = HEX[(bytes[0] >> 4) as usize];
+    buf[1] = HEX[(bytes[0] & 0x0f) as usize];
+    buf[2] = HEX[(bytes[1] >> 4) as usize];
+    buf[3] = HEX[(bytes[1] & 0x0f) as usize];
+    buf[4] = HEX[(bytes[2] >> 4) as usize];
+    buf[5] = HEX[(bytes[2] & 0x0f) as usize];
+    buf[6] = HEX[(bytes[3] >> 4) as usize];
+    buf[7] = HEX[(bytes[3] & 0x0f) as usize];
+}
+
+#[inline(always)]
+pub fn md5_to_hex(words: &(u32, u32, u32, u32), buffer: &mut [u8; 32]) {
+    u32_to_hex(words.0, &mut buffer[0..8]);
+    u32_to_hex(words.1, &mut buffer[8..16]);
+    u32_to_hex(words.2, &mut buffer[16..24]);
+    u32_to_hex(words.3, &mut buffer[24..]);
 }
