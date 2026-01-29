@@ -1,11 +1,10 @@
-mod y2023;
-mod y2024;
-mod y2025;
-
 use std::env;
 use std::time::Instant;
 use y2015;
 use y2016;
+use y2023;
+use y2024;
+use y2025;
 
 // #[cfg(windows)]
 // {
