@@ -6,12 +6,17 @@ edition = "2024"
 [dependencies]
 y2015 = { path = "y2015" }
 y2016 = { path = "y2016" }
+y2017 = { path = "y2017" }
+y2023 = { path = "y2023" }
+y2024 = { path = "y2024" }
+y2025 = { path = "y2025" }
 
 [workspace]
-members = ["y2015", "y2016"]
+members = ["y2015", "y2016", "y2017", "y2023", "y2024", "y2025"]
 
 # [lib]
 # name = "y2015"
 
 [profile.release]
 debug = true
+# lto = true

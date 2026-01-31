@@ -18,7 +18,7 @@ fn next_u32(bytes: &mut impl Iterator<Item = u8>) -> Option<u32> {
 
 fn parse(input_path: &PathBuf) -> Result<Vec<(u32, u32)>, Box<dyn std::error::Error>> {
     let reader = BufReader::new(fs::File::open(input_path)?);
-    let bytes = &mut reader.bytes().flatten().peekable();
+    let bytes = &mut reader.bytes().flatten();
     let mut ranges: Vec<(u32, u32)> = std::iter::repeat_with(|| (next_u32(bytes), next_u32(bytes)))
         .map_while(|(a, b)| a.and_then(|a| b.and_then(|b| Some((a, b)))))
         .collect();
