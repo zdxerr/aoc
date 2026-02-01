@@ -38,7 +38,7 @@ where
         (next(bytes), next(bytes), next(bytes), next(bytes))
     })
     .map_while(|(a, b, c, d)| {
-        a.and_then(|a| b.and_then(|b| c.and_then(|c| d.and_then(|d| Some((a, b, c, d))))))
+        a.and_then(|a| b.and_then(|b| c.and_then(|c| d.and_then(|d| Some((b, a, c, d))))))
     })
     .collect();
     nodes.sort_unstable();
@@ -64,28 +64,50 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     Ok(count)
 }
 
-pub fn part2(input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
-    // let input_path = &PathBuf::from(r"input/y2016/d22/test.txt");
-    let nodes = parse::<u32>(input_path)?;
-    // BFS?
-    //
-    for node in &nodes {
-        println!("{node:?}");
+fn _print_grid(nodes: &Vec<(u32, u32, u32, u32)>, columns: u32) {
+    for x in 0..=columns {
+        print!("{x:2} ");
     }
-    let last = nodes.last().unwrap();
+    println!();
+    for (y, x, _, used) in nodes {
+        if *x == 0 {
+            print!("{y:3} ");
+        }
+        print!(
+            " {} ",
+            if *used == 0 {
+                '_'
+            } else if *used > 300 {
+                '#'
+            } else {
+                '.'
+            }
+        );
+        if *x == columns {
+            println!();
+        }
+    }
+}
 
-    let rows = last.1 as usize + 1;
-    println!("{} / {}", nodes.len(), (last.0 + 1) * (last.1 + 1));
+pub fn part2(input_path: &PathBuf) -> Result<u32, Box<dyn std::error::Error>> {
+    let nodes = parse::<u32>(input_path)?;
 
-    let r15_7 = nodes[rows * 15 + 7];
+    let columns = nodes.last().ok_or_else(|| "unable to find last row")?.1;
 
-    println!("{rows} {r15_7:?}");
+    // println!();
+    // _print_grid(&nodes, columns);
 
-    // grid
-    //
-    // let grid = nodes.iter().map(())
+    let left_wall_edge = nodes
+        .iter()
+        .find_map(|(_, x, _, used)| if *used > 300 { Some(x) } else { None })
+        .ok_or_else(|| "unable to find left wall edge")?;
 
-    // nodes.last()
+    let empty_node = nodes
+        .iter()
+        .find_map(|(y, x, _, used)| if *used == 0 { Some((x, y)) } else { None })
+        .ok_or_else(|| "unable to find empty node")?;
 
-    Err("not implemented".into())
+    // print the grid and count the number of moves necessary:
+    // 3 + 25 + 32 + 5*32 = 220
+    Ok(empty_node.0 - left_wall_edge + 1 + empty_node.1 + (columns - 1) + 5 * (columns - 1))
 }
