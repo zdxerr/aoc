@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 enum Argument {
-    // None,
     Register(usize),
     Integer(i64),
 }
@@ -37,16 +36,20 @@ fn parse_instruction(instruction: &[u8]) -> (&[u8], Vec<Argument>) {
     (&instruction[..cmd_len], arguments)
 }
 
-pub fn part1(input_path: &PathBuf) -> Result<i64, Box<dyn std::error::Error>> {
+fn run(input_path: &PathBuf, init_value: i64) -> Result<i64, Box<dyn std::error::Error>> {
     let mut program: Vec<_> = BufReader::new(fs::File::open(input_path)?)
         .split(b'\n')
         .flatten()
         .collect();
 
-    let mut register = [7, 0, 0, 0];
+    let mut register = [init_value, 0, 0, 0];
     let mut index = 0;
 
     while let Some(instruction) = program.get(index) {
+        println!(
+            "-> {index:2} {} [{register:?}]",
+            String::from_utf8_lossy(instruction)
+        );
         let (cmd, arguments) = parse_instruction(instruction);
         match (cmd, arguments.as_slice()) {
             (b"cpy", [Argument::Register(r1), Argument::Register(r2)]) => {
@@ -114,7 +117,11 @@ pub fn part1(input_path: &PathBuf) -> Result<i64, Box<dyn std::error::Error>> {
     Ok(register[0])
 }
 
-pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
+pub fn part1(input_path: &PathBuf) -> Result<i64, Box<dyn std::error::Error>> {
+    run(input_path, 7)
+}
+
+pub fn part2(input_path: &PathBuf) -> Result<i64, Box<dyn std::error::Error>> {
     // The safe doesn't open, but it does make several angry noises to express its frustration.
 
     // You're quite sure your logic is working correctly, so the only other thing is... you check
@@ -125,5 +132,5 @@ pub fn part2(_input_path: &PathBuf) -> Result<u64, Box<dyn std::error::Error>> {
     // "add one" has anything to do with it. Don't bunnies usually multiply?
 
     // Anyway, what value should actually be sent to the safe?
-    Err("not implemented".into())
+    run(input_path, 12)
 }
