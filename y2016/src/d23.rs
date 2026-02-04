@@ -75,8 +75,33 @@ impl Instruction {
     }
 }
 
+// multiplication sequence can be optimized to improve performance
+fn optimize_multiplication(
+    program: &[Instruction],
+    index: usize,
+) -> Option<(&usize, &usize, usize)> {
+    if let (
+        Some(Instruction::Inc(_)),
+        Some(Instruction::Dec(a)),
+        Some(Instruction::JnzRegisterToInteger(a1, -2)),
+        Some(Instruction::Dec(b)),
+        Some(Instruction::JnzRegisterToInteger(b1, -5)),
+    ) = (
+        program.get(index),
+        program.get(index + 1),
+        program.get(index + 2),
+        program.get(index + 3),
+        program.get(index + 4),
+    ) && a == a1
+        && b == b1
+    {
+        Some((a, b, 5))
+    } else {
+        None
+    }
+}
+
 fn run(input_path: &PathBuf, init_value: i64) -> Result<i64, Box<dyn std::error::Error>> {
-    // println!();
     let mut program: Vec<_> = BufReader::new(fs::File::open(input_path)?)
         .split(b'\n')
         .flatten()
@@ -86,9 +111,13 @@ fn run(input_path: &PathBuf, init_value: i64) -> Result<i64, Box<dyn std::error:
     let mut register = [init_value, 0, 0, 0];
     let mut index = 0;
     while let Some(instruction) = program.get(index) {
-        // println!("-> {index:2} {instruction:?} [{register:?}]",);
         match instruction {
             Instruction::Inc(r1) => {
+                if let Some((ra, rb, skip)) = optimize_multiplication(&program, index) {
+                    register[*r1] += register[*ra] * register[*rb];
+                    index += skip;
+                    continue;
+                }
                 register[*r1] += 1;
             }
             Instruction::Dec(r1) => {
