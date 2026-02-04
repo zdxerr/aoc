@@ -1,4 +1,5 @@
 use std::env;
+use std::io::Write;
 use std::time::Instant;
 use y2015;
 use y2016;
@@ -46,19 +47,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .join(year)
                     .join(day)
                     .join("input.txt");
+                rgb_print!(144, 140, 170, "   1 ");
+                std::io::stdout().flush()?;
                 let t0 = Instant::now();
                 let result = $year::$day::part1(&input_path);
                 let duration = t0.elapsed().as_secs_f64() * 1000.0;
-                rgb_print!(144, 140, 170, "   1 ");
                 rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
                 match result {
                     Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
                     Err(msg) => rgb_print!(235, 111, 146, " {msg:>20}"),
                 }
+                rgb_print!(144, 140, 170, "   2 ");
+                std::io::stdout().flush()?;
                 let t0 = Instant::now();
                 let result = $year::$day::part2(&input_path);
                 let duration = t0.elapsed().as_secs_f64() * 1000.0;
-                rgb_print!(144, 140, 170, "   2 ");
                 rgb_print!(246, 193, 119, "{duration:8.3}ms ⏱ ");
                 match result {
                     Ok(result) => rgb_print!(196, 167, 231, " {result:>20}"),
