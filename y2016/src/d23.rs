@@ -36,6 +36,16 @@ fn parse_instruction(instruction: &[u8]) -> (&[u8], Vec<Argument>) {
     (&instruction[..cmd_len], arguments)
 }
 
+fn get_instruction<'a>(
+    program: &'a Vec<Vec<u8>>,
+    index: usize,
+) -> Option<(&'a [u8], Box<[Argument]>)> {
+    program.get(index).and_then(|instruction| {
+        let (cmd, arguments) = parse_instruction(instruction);
+        Some((cmd, arguments.iter().as_slice()))
+    })
+}
+
 fn run(input_path: &PathBuf, init_value: i64) -> Result<i64, Box<dyn std::error::Error>> {
     let mut program: Vec<_> = BufReader::new(fs::File::open(input_path)?)
         .split(b'\n')
@@ -45,14 +55,19 @@ fn run(input_path: &PathBuf, init_value: i64) -> Result<i64, Box<dyn std::error:
     let mut register = [init_value, 0, 0, 0];
     let mut index = 0;
 
-    while let Some(instruction) = program.get(index) {
+    // while let Some(instruction) = program.get(index) {
+    while let Some(instruction) = get_instruction(&program, index) {
         println!(
             "-> {index:2} {} [{register:?}]",
             String::from_utf8_lossy(instruction)
         );
         let (cmd, arguments) = parse_instruction(instruction);
-        match (cmd, arguments.as_slice()) {
-            (b"cpy", [Argument::Register(r1), Argument::Register(r2)]) => {
+
+        if let (b"cpy", [Argument::Register(1), Argument::Register(2)]) =
+            (cmd, arguments.as_slice())
+        {}
+        match instruction {
+            (b"cpy", Box([Argument::Register(r1), Argument::Register(r2)])) => {
                 register[*r2] = register[*r1];
             }
             (b"cpy", [Argument::Integer(i1), Argument::Register(r1)]) => {
