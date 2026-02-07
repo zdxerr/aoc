@@ -80,23 +80,19 @@ impl Instruction {
 }
 
 // multiplication sequence can be optimized to improve performance
+#[inline]
 fn optimize_multiplication(
     program: &[Instruction],
     index: usize,
 ) -> Option<(&usize, &usize, usize)> {
-    if let (
-        Some(Instruction::Inc(_)),
-        Some(Instruction::Dec(a)),
-        Some(Instruction::JnzRegisterToInteger(a1, -2)),
-        Some(Instruction::Dec(b)),
-        Some(Instruction::JnzRegisterToInteger(b1, -5)),
-    ) = (
-        program.get(index),
-        program.get(index + 1),
-        program.get(index + 2),
-        program.get(index + 3),
-        program.get(index + 4),
-    ) && a == a1
+    if let [
+        // Instruction::Inc(_),
+        Instruction::Dec(a),
+        Instruction::JnzRegisterToInteger(a1, -2),
+        Instruction::Dec(b),
+        Instruction::JnzRegisterToInteger(b1, -5),
+    ] = &program[index + 1..index + 5]
+        && a == a1
         && b == b1
     {
         Some((a, b, 5))
