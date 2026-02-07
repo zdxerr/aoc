@@ -105,18 +105,20 @@ fn optimize_multiplication(
     }
 }
 
-pub fn run(
+pub fn run<F>(
     input_path: &PathBuf,
     register: &mut [i64; 4],
-    output: &mut Vec<Integer>,
-) -> Result<i64, Box<dyn std::error::Error>> {
+    mut callback: F,
+) -> Result<Integer, Box<dyn std::error::Error>>
+where
+    F: FnMut(Integer) -> bool,
+{
     let mut program: Vec<_> = BufReader::new(fs::File::open(input_path)?)
         .split(b'\n')
         .flatten()
         .map(Instruction::parse)
         .collect::<Result<Vec<Instruction>, Box<dyn std::error::Error>>>()?;
 
-    // let mut register = [init_value, 0, 0, 0];
     let mut index = 0;
     while let Some(instruction) = program.get(index) {
         match instruction {
@@ -207,8 +209,7 @@ pub fn run(
                 }
             }
             Instruction::Out(r1) => {
-                output.push(register[*r1]);
-                if output.len() >= 20 {
+                if !callback(register[*r1]) {
                     break;
                 }
             }
