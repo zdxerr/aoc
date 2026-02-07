@@ -109,7 +109,6 @@ pub fn run(
     input_path: &PathBuf,
     register: &mut [i64; 4],
     output: &mut Vec<Integer>,
-    f: Option<impl Fn(&Vec<Integer>) -> ()>,
 ) -> Result<i64, Box<dyn std::error::Error>> {
     let mut program: Vec<_> = BufReader::new(fs::File::open(input_path)?)
         .split(b'\n')
