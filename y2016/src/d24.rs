@@ -36,8 +36,8 @@ where
 }
 
 pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> {
-    let map = fs::read(input_path)?;
-    // let map = fs::read("input/y2016/d24/test.txt")?;
+    // let map = fs::read(input_path)?;
+    let map = fs::read("input/y2016/d24/test.txt")?;
     let xlen = map
         .iter()
         .position(|&c| c == b'\n')
@@ -64,15 +64,16 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         map: &Vec<u8>,
         xlen: usize,
         from: usize,
-        to: usize,
-        queue: &mut BinaryHeap<Reverse<(usize, usize, usize)>>,
+        // to: usize,
+        queue: &mut BinaryHeap<Reverse<(usize, usize)>>,
         visited: &mut Vec<bool>,
-    ) -> Option<usize> {
+        shortest_paths: &mut HashMap<u8, usize>,
+    ) {
         queue.clear();
         visited.fill(false);
 
-        let distance = from.rem_euclid(xlen).abs_diff(to.rem_euclid(xlen))
-            + from.div_euclid(xlen).abs_diff(to.div_euclid(xlen));
+        // let distance = from.rem_euclid(xlen).abs_diff(to.rem_euclid(xlen))
+        //     + from.div_euclid(xlen).abs_diff(to.div_euclid(xlen));
 
         // println!(
         //     "From: {from} To: {to} Distance: {distance} {} {}",
@@ -80,25 +81,26 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
         //     from.rem_euclid(xlen).abs_diff(to.rem_euclid(xlen))
         // );
 
-        queue.push(Reverse((0, distance, from)));
+        queue.push(Reverse((0, from)));
 
-        while let Some(Reverse((len, _, index))) = queue.pop() {
+        while let Some(Reverse((len, index))) = queue.pop() {
             visited[index] = true;
-            if index == to {
-                return Some(len);
+            if (b'0'..b'9').contains(&map[index]) {
+                let key = (1 << (map[from] - b'0') as u8) | (1 << (map[index] - b'0') as u8);
+                println!("{key:08b} : {len}");
+                shortest_paths.insert(key, len);
             }
 
             [index - xlen, index + 1, index + xlen, index - 1]
                 .iter()
                 .for_each(|&next| {
                     if map[next] != b'#' && !visited[next] {
-                        let distance = next.rem_euclid(xlen).abs_diff(to.rem_euclid(xlen))
-                            + next.div_euclid(xlen).abs_diff(to.div_euclid(xlen));
-                        queue.push(Reverse((len + 1, distance, next)));
+                        // let distance = next.rem_euclid(xlen).abs_diff(to.rem_euclid(xlen))
+                        //     + next.div_euclid(xlen).abs_diff(to.div_euclid(xlen));
+                        queue.push(Reverse((len + 1, next)));
                     }
                 });
         }
-        None
     }
 
     let mut visited = vec![false; map.len()];
@@ -107,32 +109,30 @@ pub fn part1(input_path: &PathBuf) -> Result<usize, Box<dyn std::error::Error>> 
     // find the shortest path for each unique pair
     // select the shortest sum of paths?
     for a in 0..positions_len {
-        for b in (a + 1)..positions_len {
-            println!("{a}->{b}");
-            shortest_paths.insert(
-                1 << a | 1 << b,
-                shortest_path(
-                    &map,
-                    xlen,
-                    positions[a].unwrap(),
-                    positions[b].unwrap(),
-                    &mut queue,
-                    &mut visited,
-                ),
-            );
-        }
+        println!("{a}->");
+        shortest_path(
+            &map,
+            xlen,
+            positions[a].unwrap(),
+            // positions[b].unwrap(),
+            &mut queue,
+            &mut visited,
+            &mut shortest_paths,
+        );
     }
 
     let mut v: Vec<usize> = (1..positions_len).collect();
     let mut min = usize::MAX;
     permute(&mut v[..], |route| {
-        let len: usize = shortest_paths[&(1 | 1 << route[0])].unwrap()
+        let len: usize = shortest_paths.get(&(1 | 1 << route[0])).unwrap()
             + route
                 .windows(2)
-                .flat_map(|positions| shortest_paths[&(1 << positions[0] | 1 << positions[1])])
+                .map(|positions| shortest_paths[&(1 << positions[0] | 1 << positions[1])])
                 // .flatten()
                 .sum::<usize>()
-            + shortest_paths[&(1 | 1 << route.last().unwrap())].unwrap(); // part 2
+            + shortest_paths
+                .get(&(1 | 1 << route.last().unwrap()))
+                .unwrap(); // part 2
         min = min.min(len);
         println!("ROUTE 0 -> {route:?} {len}");
     });
