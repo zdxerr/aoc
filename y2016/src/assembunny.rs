@@ -86,7 +86,6 @@ fn optimize_multiplication(
     index: usize,
 ) -> Option<(&usize, &usize, usize)> {
     if let [
-        // Instruction::Inc(_),
         Instruction::Dec(a),
         Instruction::JnzRegisterToInteger(a1, -2),
         Instruction::Dec(b),

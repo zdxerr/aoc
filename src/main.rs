@@ -128,9 +128,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run!(y2023, d02, "Cube Conundrum");
 
     run!(y2024, d01, "Historian Hysteria");
-    run!(y2024, d02, "");
-    run!(y2024, d03, "");
-    run!(y2024, d04, "");
+    run!(y2024, d02, "Red-Nosed Reports");
+    run!(y2024, d03, "Mull It Over");
+    run!(y2024, d04, "Ceres Search");
     run!(y2024, d05, "");
     run!(y2024, d06, "");
     run!(y2024, d07, "");
